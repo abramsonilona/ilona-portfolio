@@ -51,8 +51,8 @@ function ReverieLayout({ project }: { project: Project }) {
           style={{ textAlign: "right" }}
         >
           <h1 style={{
-            fontFamily: "var(--font-display-en)",
-            fontStyle: "italic",
+            fontFamily: "var(--font-body-en)",
+            fontStyle: "normal",
             fontWeight: 300,
             fontSize: "clamp(52px, 7vw, 96px)",
             lineHeight: 1,
