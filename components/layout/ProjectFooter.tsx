@@ -1,6 +1,7 @@
 "use client";
 
 import { Project } from "@/lib/projects";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 interface Props {
   project?: Project;
@@ -48,6 +49,7 @@ function IconLinkedIn() {
 
 export default function ProjectFooter({ project }: Props) {
   const designerCredit = project?.designerCredit;
+  const isMobile = useIsMobile();
 
   return (
     <footer style={{
@@ -57,145 +59,105 @@ export default function ProjectFooter({ project }: Props) {
       position: "relative",
       overflow: "hidden",
     }}>
-      {/* Scribble decorations — positioned absolutely behind content */}
-      {/* Left edge scribble (mirrored) */}
-      <div style={{
-        position: "absolute",
-        left: -80,
-        bottom: -30,
-        width: 520,
-        opacity: 0.95,
-        pointerEvents: "none",
-        transform: "scaleX(-1)",
-      }}>
-        <img src="/projects/reverie/Green-Scrible-Footer.svg" alt="" style={{ width: "100%", display: "block" }} />
-      </div>
-      {/* Right edge scribble */}
-      <div style={{
-        position: "absolute",
-        right: -80,
-        bottom: -30,
-        width: 520,
-        opacity: 0.95,
-        pointerEvents: "none",
-      }}>
-        <img src="/projects/reverie/Green-Scrible-Footer.svg" alt="" style={{ width: "100%", display: "block" }} />
-      </div>
+      {/* Scribble decorations — hidden on mobile */}
+      {!isMobile && (
+        <>
+          <div style={{ position: "absolute", left: -80, bottom: -30, width: 520, opacity: 0.95, pointerEvents: "none", transform: "scaleX(-1)" }}>
+            <img src="/projects/reverie/Green-Scrible-Footer.svg" alt="" style={{ width: "100%", display: "block" }} />
+          </div>
+          <div style={{ position: "absolute", right: -80, bottom: -30, width: 520, opacity: 0.95, pointerEvents: "none" }}>
+            <img src="/projects/reverie/Green-Scrible-Footer.svg" alt="" style={{ width: "100%", display: "block" }} />
+          </div>
+        </>
+      )}
 
       {/* Content */}
       <div style={{
         maxWidth: 1280,
         margin: "0 auto",
-        padding: "40px 56px",
+        padding: isMobile ? "48px 24px 40px" : "40px 56px",
         display: "grid",
-        gridTemplateColumns: "1fr auto 1fr",
+        gridTemplateColumns: isMobile ? "1fr" : "1fr auto 1fr",
         alignItems: "center",
-        gap: 32,
+        gap: isMobile ? 32 : 32,
         position: "relative",
         zIndex: 1,
+        textAlign: isMobile ? "center" : undefined,
       }}>
 
-        {/* Right column (first in DOM = right in RTL): social icons + email */}
+        {/* Social icons + email */}
         <div style={{
           display: "flex",
           flexDirection: "column",
-          alignItems: "flex-start",
-          gap: 12,
+          alignItems: isMobile ? "center" : "flex-start",
+          gap: isMobile ? 16 : 12,
         }}>
-          <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-            <a
-              href="https://instagram.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Instagram"
+          <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"
               style={{ opacity: 1, transition: "opacity 0.2s" }}
               onMouseEnter={e => ((e.currentTarget as HTMLElement).style.opacity = "0.6")}
-              onMouseLeave={e => ((e.currentTarget as HTMLElement).style.opacity = "1")}
-            >
+              onMouseLeave={e => ((e.currentTarget as HTMLElement).style.opacity = "1")}>
               <IconInstagram />
             </a>
-            <a
-              href="https://linkedin.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="LinkedIn"
+            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"
               style={{ opacity: 1, transition: "opacity 0.2s" }}
               onMouseEnter={e => ((e.currentTarget as HTMLElement).style.opacity = "0.6")}
-              onMouseLeave={e => ((e.currentTarget as HTMLElement).style.opacity = "1")}
-            >
+              onMouseLeave={e => ((e.currentTarget as HTMLElement).style.opacity = "1")}>
               <IconLinkedIn />
             </a>
-            <a
-              href="https://wa.me/972500000000"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="WhatsApp"
+            <a href="https://wa.me/972500000000" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"
               style={{ opacity: 1, transition: "opacity 0.2s" }}
               onMouseEnter={e => ((e.currentTarget as HTMLElement).style.opacity = "0.6")}
-              onMouseLeave={e => ((e.currentTarget as HTMLElement).style.opacity = "1")}
-            >
+              onMouseLeave={e => ((e.currentTarget as HTMLElement).style.opacity = "1")}>
               <IconWhatsapp />
             </a>
           </div>
-          <a
-            href="mailto:abramsonilona@gmail.com"
+          <a href="mailto:abramsonilona@gmail.com"
             style={{
-              fontFamily: "var(--font-body-en)",
-              fontWeight: 300,
-              fontSize: 11,
-              color: C.ink3,
-              letterSpacing: "0.03em",
-              textDecoration: "none",
-              transition: "color 0.2s",
-              direction: "ltr",
+              fontFamily: "var(--font-body-en)", fontWeight: 300, fontSize: 11,
+              color: C.ink3, letterSpacing: "0.03em", textDecoration: "none",
+              transition: "color 0.2s", direction: "ltr",
             }}
             onMouseEnter={e => ((e.target as HTMLElement).style.color = C.ink)}
-            onMouseLeave={e => ((e.target as HTMLElement).style.color = C.ink3)}
-          >
+            onMouseLeave={e => ((e.target as HTMLElement).style.color = C.ink3)}>
             abramsonilona@gmail.com
           </a>
         </div>
 
-        {/* Centre column: logo */}
+        {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <img src="/logo.png.png" alt="Ilona Abramson" style={{ height: 18, width: "auto", display: "block", objectFit: "contain" }} />
+          <img
+            src="/logo.png.png"
+            alt="Ilona Abramson"
+            style={{
+              height: 18,
+              width: "auto",
+              maxWidth: isMobile ? 160 : "none",
+              display: "block",
+              objectFit: "contain",
+            }}
+          />
         </div>
 
-        {/* Left column (last in DOM = left in RTL): copyright + designer credit */}
-        <div style={{ textAlign: "left" }}>
+        {/* Copyright + designer credit */}
+        <div style={{ textAlign: isMobile ? "center" : "left", direction: "ltr" }}>
           <p style={{
-            fontFamily: "var(--font-body-en)",
-            fontWeight: 300,
-            fontSize: 11,
-            color: C.ink3,
-            letterSpacing: "0.03em",
-            margin: "0 0 6px",
-            direction: "ltr",
+            fontFamily: "var(--font-body-en)", fontWeight: 300, fontSize: 11,
+            color: C.ink3, letterSpacing: "0.03em",
+            margin: isMobile ? "0 0 4px" : "0 0 6px",
           }}>
             © All rights reserved to Ilona Abramson
           </p>
           {designerCredit && (
             <p style={{
-              fontFamily: "var(--font-body-en)",
-              fontWeight: 300,
-              fontSize: 11,
-              color: C.ink3,
-              letterSpacing: "0.03em",
-              margin: 0,
-              direction: "ltr",
+              fontFamily: "var(--font-body-en)", fontWeight: 300, fontSize: 11,
+              color: C.ink3, letterSpacing: "0.03em", margin: 0,
             }}>
               Design by{" "}
-              <a
-                href="#"
-                style={{
-                  color: C.ink3,
-                  textDecoration: "underline",
-                  textUnderlineOffset: 2,
-                  transition: "color 0.2s",
-                }}
+              <a href="#"
+                style={{ color: C.ink3, textDecoration: "underline", textUnderlineOffset: 2, transition: "color 0.2s" }}
                 onMouseEnter={e => ((e.target as HTMLElement).style.color = C.ink)}
-                onMouseLeave={e => ((e.target as HTMLElement).style.color = C.ink3)}
-              >
+                onMouseLeave={e => ((e.target as HTMLElement).style.color = C.ink3)}>
                 {designerCredit}
               </a>
             </p>

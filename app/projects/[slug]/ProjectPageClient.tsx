@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Project } from "@/lib/projects";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import ProjectFooter from "@/components/layout/ProjectFooter";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 interface Props { project: Project; }
 
@@ -20,30 +21,36 @@ const C = {
 
 /* ── Reverie-specific layout ─────────────────────────────────────── */
 function ReverieLayout({ project }: { project: Project }) {
+  const isMobile = useIsMobile();
   const images = project.images ?? [];
-  // Pair into rows of 2
   const rows: [string, string][] = [];
   for (let i = 0; i + 1 < images.length; i += 2) {
     rows.push([images[i], images[i + 1]]);
   }
 
+  const pad = isMobile ? "0 20px" : "0 56px";
+
   return (
     <div style={{ background: C.cream, color: C.ink, direction: "rtl" }}>
 
-      {/* Hero video — full width, natural height */}
+      {/* Hero video — full width, natural height; mobile uses separate file */}
       <div style={{ lineHeight: 0, background: "#1a0a00" }}>
         <video
-          src={project.videoUrl}
           autoPlay
           muted
           loop
           playsInline
           style={{ width: "100%", display: "block" }}
-        />
+        >
+          {/* Mobile video (≤767px) */}
+          <source src="/projects/reverie/Mobile-Banner-Reverie.mp4" media="(max-width: 767px)" type="video/mp4" />
+          {/* Desktop video */}
+          <source src={project.videoUrl} type="video/mp4" />
+        </video>
       </div>
 
       {/* Title block */}
-      <section style={{ padding: "72px 56px 0", maxWidth: 1280, margin: "0 auto" }}>
+      <section style={{ padding: isMobile ? "40px 20px 0" : "72px 56px 0", maxWidth: 1280, margin: "0 auto" }}>
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -54,7 +61,7 @@ function ReverieLayout({ project }: { project: Project }) {
             fontFamily: "var(--font-body-en)",
             fontStyle: "normal",
             fontWeight: 300,
-            fontSize: "clamp(52px, 7vw, 96px)",
+            fontSize: isMobile ? "clamp(40px, 11vw, 60px)" : "clamp(52px, 7vw, 96px)",
             lineHeight: 1,
             letterSpacing: "-0.02em",
             color: C.ink,
@@ -65,9 +72,9 @@ function ReverieLayout({ project }: { project: Project }) {
           <p style={{
             fontFamily: "var(--font-heading)",
             fontWeight: 400,
-            fontSize: 15,
+            fontSize: isMobile ? 13 : 15,
             color: C.violet,
-            marginTop: 10,
+            marginTop: 8,
             marginBottom: 0,
           }}>
             {project.category}
@@ -76,56 +83,53 @@ function ReverieLayout({ project }: { project: Project }) {
       </section>
 
       {/* Body text */}
-      <section style={{ padding: "48px 56px 64px", maxWidth: 1280, margin: "0 auto" }}>
+      <section style={{ padding: isMobile ? "32px 20px 48px" : "48px 56px 64px", maxWidth: 1280, margin: "0 auto" }}>
         <ScrollReveal>
           <div style={{
             borderTop: `1px solid ${C.line}`,
-            paddingTop: 48,
+            paddingTop: isMobile ? 32 : 48,
             maxWidth: 680,
             marginRight: 0,
             marginLeft: "auto",
             textAlign: "right",
           }}>
-            {/* Heading 1 */}
             <h2 style={{
               fontFamily: "var(--font-heading)",
               fontWeight: 700,
-              fontSize: "clamp(20px, 2.2vw, 26px)",
+              fontSize: isMobile ? 18 : "clamp(20px, 2.2vw, 26px)",
               lineHeight: 1.3,
               letterSpacing: "-0.018em",
               color: C.ink,
-              margin: "0 0 18px",
+              margin: "0 0 16px",
             }}>
               לגרום לכם לחלום על השוקולד הזה
             </h2>
 
-            {/* Paragraph 1 — multi-paragraph, split on \n\n */}
             {project.description.split("\n\n").map((para, i) => (
               <p key={i} style={{
                 fontFamily: "var(--font-heading)",
                 fontWeight: 400,
-                fontSize: 17,
+                fontSize: isMobile ? 15 : 17,
                 lineHeight: 1.8,
                 color: C.ink2,
-                margin: "0 0 20px",
+                margin: "0 0 16px",
               }}>
                 {para}
               </p>
             ))}
 
-            <div style={{ marginBottom: 32 }} />
+            <div style={{ marginBottom: isMobile ? 20 : 32 }} />
 
-            {/* Paragraph 2 — first chunk is the section title, rest are body */}
             {project.solution.split("\n\n").map((para, i) =>
               i === 0 ? (
                 <h2 key={i} style={{
                   fontFamily: "var(--font-heading)",
                   fontWeight: 700,
-                  fontSize: "clamp(20px, 2.2vw, 26px)",
+                  fontSize: isMobile ? 18 : "clamp(20px, 2.2vw, 26px)",
                   lineHeight: 1.3,
                   letterSpacing: "-0.018em",
                   color: C.ink,
-                  margin: "0 0 18px",
+                  margin: "0 0 16px",
                 }}>
                   {para}
                 </h2>
@@ -133,10 +137,10 @@ function ReverieLayout({ project }: { project: Project }) {
                 <p key={i} style={{
                   fontFamily: "var(--font-heading)",
                   fontWeight: 400,
-                  fontSize: 17,
+                  fontSize: isMobile ? 15 : 17,
                   lineHeight: 1.8,
                   color: C.ink2,
-                  margin: "0 0 20px",
+                  margin: "0 0 16px",
                 }}>
                   {para}
                 </p>
@@ -145,7 +149,6 @@ function ReverieLayout({ project }: { project: Project }) {
 
             <div style={{ marginBottom: 28 }} />
 
-            {/* Designer credit */}
             {project.designerCredit && (
               <div style={{ borderTop: `1px solid ${C.line}`, paddingTop: 24 }}>
                 <p style={{
@@ -180,25 +183,31 @@ function ReverieLayout({ project }: { project: Project }) {
         </ScrollReveal>
       </section>
 
-      {/* Image grid — natural proportions, 2 columns */}
-      <section style={{ padding: "0 56px 96px", maxWidth: 1280, margin: "0 auto" }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {rows.map(([left, right], i) => (
-            <ScrollReveal key={i}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+      {/* Image grid — 1 col on mobile, 2 cols on desktop */}
+      <section style={{ padding: isMobile ? `0 0 64px` : `0 56px 96px`, maxWidth: isMobile ? "100%" : 1280, margin: "0 auto" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? 6 : 12 }}>
+          {isMobile ? (
+            /* Single column — full bleed on mobile */
+            images.map((src, i) => (
+              <ScrollReveal key={i}>
                 <img
-                  src={left}
-                  alt={`${project.title} ${i * 2 + 1}`}
+                  src={src}
+                  alt={`${project.title} ${i + 1}`}
                   style={{ width: "100%", display: "block", height: "auto" }}
                 />
-                <img
-                  src={right}
-                  alt={`${project.title} ${i * 2 + 2}`}
-                  style={{ width: "100%", display: "block", height: "auto" }}
-                />
-              </div>
-            </ScrollReveal>
-          ))}
+              </ScrollReveal>
+            ))
+          ) : (
+            /* 2-column pairs on desktop */
+            rows.map(([left, right], i) => (
+              <ScrollReveal key={i}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                  <img src={left}  alt={`${project.title} ${i * 2 + 1}`} style={{ width: "100%", display: "block", height: "auto" }} />
+                  <img src={right} alt={`${project.title} ${i * 2 + 2}`} style={{ width: "100%", display: "block", height: "auto" }} />
+                </div>
+              </ScrollReveal>
+            ))
+          )}
         </div>
       </section>
 
