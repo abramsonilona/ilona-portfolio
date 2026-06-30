@@ -118,40 +118,21 @@ export default function Navigation() {
           </button>
         ) : (
           <nav style={{ display: "flex", gap: "2rem", alignItems: "center" }}>
-            {navLinks.map(link =>
-              link.external ? (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "0.875rem",
-                    fontWeight: 400,
-                    color: "var(--muted)",
-                    transition: "color 0.2s",
-                    letterSpacing: "0",
-                  }}
-                  onMouseEnter={e => ((e.target as HTMLElement).style.color = "var(--purple)")}
-                  onMouseLeave={e => ((e.target as HTMLElement).style.color = "var(--muted)")}
-                >
-                  {link.label}
-                </a>
-              ) : (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "0.875rem",
-                    fontWeight: 400,
-                    color: pathname === link.href ? "var(--purple)" : "var(--muted)",
-                    transition: "color 0.2s",
-                  }}
-                >
-                  {link.label}
-                </Link>
-              )
-            )}
+            {navLinks.map(link => (
+              <Link
+                key={link.href}
+                href={link.href}
+                style={{
+                  fontFamily: "var(--font-body)",
+                  fontSize: "0.875rem",
+                  fontWeight: 400,
+                  color: pathname === link.href ? "var(--purple)" : "var(--muted)",
+                  transition: "color 0.2s",
+                }}
+              >
+                {link.label}
+              </Link>
+            ))}
             <CtaPill />
           </nav>
         )}
@@ -185,37 +166,21 @@ export default function Navigation() {
               direction: "rtl",
             }}
           >
-            {navLinks.map(link =>
-              link.external ? (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "1.1rem",
-                    fontWeight: 400,
-                    color: INK,
-                    textDecoration: "none",
-                  }}
-                >
-                  {link.label}
-                </a>
-              ) : (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "1.1rem",
-                    fontWeight: 400,
-                    color: pathname === link.href ? "var(--purple)" : INK,
-                    textDecoration: "none",
-                  }}
-                >
-                  {link.label}
-                </Link>
-              )
-            )}
+            {navLinks.map(link => (
+              <Link
+                key={link.href}
+                href={link.href}
+                style={{
+                  fontFamily: "var(--font-body)",
+                  fontSize: "1.1rem",
+                  fontWeight: 400,
+                  color: pathname === link.href ? "var(--purple)" : INK,
+                  textDecoration: "none",
+                }}
+              >
+                {link.label}
+              </Link>
+            ))}
             <CtaPill style={{ alignSelf: "flex-start" }} />
           </motion.nav>
         )}
