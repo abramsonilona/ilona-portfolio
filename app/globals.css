@@ -121,3 +121,83 @@ a {
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--lilac); border-radius: 3px; }
+
+/* ================================================================== *
+ *  Effects — 1) Scroll reveal   2) Project card hover
+ * ================================================================== */
+
+/* ---------- 1. SCROLL REVEAL ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.8s cubic-bezier(0.2, 0.6, 0.2, 1),
+              transform 0.8s cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+.reveal.in { opacity: 1; transform: none; }
+
+/* optional stagger — add d1 / d2 / d3 alongside .reveal */
+.reveal.d1 { transition-delay: 0.08s; }
+.reveal.d2 { transition-delay: 0.16s; }
+.reveal.d3 { transition-delay: 0.24s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+}
+
+/* ---------- 2. PROJECT CARD HOVER ---------- */
+/* Structure: <a class="project-card"><div class="project-img">...</div>
+   <div class="project-overlay"><div class="project-meta">
+   <span class="t">title</span><span class="s">subtitle</span>
+   </div></div></a>  (use .project-card img if the image is an <img>) */
+
+.project-card {
+  position: relative;
+  display: block;
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+}
+.project-card .project-img,
+.project-card img {
+  transition: transform 0.6s cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+
+.project-card .project-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 20px;
+  background: linear-gradient(to top, rgba(0, 38, 7, 0.78), rgba(0, 38, 7, 0) 55%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.project-card .project-meta {
+  color: #fcf7f4;
+  transform: translateY(10px);
+  transition: transform 0.4s ease;
+}
+.project-card .project-meta .t { display: block; font-weight: 700; font-size: 18px; }
+.project-card .project-meta .s { display: block; font-size: 13px; opacity: 0.85; margin-top: 2px; }
+
+.project-card:hover .project-img,
+.project-card:hover img,
+.project-card:focus-visible .project-img,
+.project-card:focus-visible img { transform: scale(1.07); }
+.project-card:hover .project-overlay,
+.project-card:focus-visible .project-overlay { opacity: 1; }
+.project-card:hover .project-meta,
+.project-card:focus-visible .project-meta { transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .project-card .project-img,
+  .project-card img,
+  .project-card .project-overlay,
+  .project-card .project-meta { transition: none !important; }
+}
+
+/* Touch devices have no hover — show the meta by default. */
+@media (hover: none) {
+  .project-card .project-overlay { opacity: 1; }
+  .project-card .project-meta { transform: none; }
+}

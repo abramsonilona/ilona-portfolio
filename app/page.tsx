@@ -2,10 +2,10 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import ScrollReveal from "@/components/ui/ScrollReveal";
 import Footer from "@/components/layout/Footer";
 import Intro from "@/components/Intro";
 import Hero from "@/components/Hero";
+import { useReveal } from "@/hooks/useReveal";
 
 /* ─── colour tokens matching globals.css ───────────────────────────── */
 const C = {
@@ -96,7 +96,7 @@ interface Tile {
   size?: "lg" | "md";
 }
 
-function BentoTile({ tile }: { tile: Tile }) {
+function BentoTile({ tile, stagger = 0 }: { tile: Tile; stagger?: number }) {
   const v = visualBg[tile.visual];
 
   const logoFont: Record<LogoStyle, React.CSSProperties> = {
@@ -112,10 +112,7 @@ function BentoTile({ tile }: { tile: Tile }) {
   return (
     <motion.a
       href={tile.href}
-      initial={{ opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-40px" }}
-      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      className={`reveal d${stagger + 1} project-card`}
       style={{
         gridColumn: isLg || isMd ? "span 2" : undefined,
         gridRow: isLg ? "span 2" : undefined,
@@ -123,14 +120,15 @@ function BentoTile({ tile }: { tile: Tile }) {
         gridTemplateRows: "1fr auto",
         background: C.white,
         textDecoration: "none",
+        borderRadius: 0,
         overflow: "hidden",
         cursor: "pointer",
         transition: "transform 280ms cubic-bezier(0.22,1,0.36,1)",
       }}
       whileHover={{ y: -3 }}
     >
-      {/* Visual block */}
-      <div style={{
+      {/* Visual block — acts as project-img for the hover zoom */}
+      <div className="project-img" style={{
         background: v.bg,
         color: v.color,
         border: v.border,
@@ -302,6 +300,8 @@ const services = [
 
 /* ─── Page ──────────────────────────────────────────────────────────── */
 export default function HomePage() {
+  useReveal();
+
   return (
     <div style={{ background: C.cream, color: C.ink, direction: "rtl" }}>
 
@@ -311,104 +311,102 @@ export default function HomePage() {
 
       {/* ══ A WORD ════════════════════════════════════════════════════ */}
       <section style={{ background: C.cream, padding: "128px 0", borderTop: `1px solid ${C.line}` }}>
-        <ScrollReveal>
-          <div style={{ maxWidth: 880, margin: "0 auto", padding: "0 56px" }}>
+        <div style={{ maxWidth: 880, margin: "0 auto", padding: "0 56px" }}>
 
-            {/* h2 */}
-            <h2 style={{
-              fontFamily: "var(--font-heading)",
-              fontWeight: 700,
-              fontSize: "clamp(40px,5vw,72px)",
-              lineHeight: 1,
-              letterSpacing: "-0.025em",
-              margin: "0 0 48px",
-              display: "flex",
-              alignItems: "baseline",
-              gap: 14,
+          {/* h2 */}
+          <h2 className="reveal" style={{
+            fontFamily: "var(--font-heading)",
+            fontWeight: 700,
+            fontSize: "clamp(40px,5vw,72px)",
+            lineHeight: 1,
+            letterSpacing: "-0.025em",
+            margin: "0 0 48px",
+            display: "flex",
+            alignItems: "baseline",
+            gap: 14,
+          }}>
+            <em style={{
+              fontFamily: "var(--font-display-en)",
+              fontStyle: "italic",
+              fontWeight: 300,
+              color: C.violet,
+              letterSpacing: "-0.005em",
             }}>
-              <em style={{
-                fontFamily: "var(--font-display-en)",
-                fontStyle: "italic",
-                fontWeight: 300,
-                color: C.violet,
-                letterSpacing: "-0.005em",
-              }}>
-                A word
-              </em>
-              ממני
-            </h2>
+              A word
+            </em>
+            ממני
+          </h2>
 
-            {/* body paragraphs */}
-            {[
-              <>התרגלנו לקצב אחר. בריפים קצרים. קמפיינים מהירים. שורות תחתונות.{" "}<em style={{ fontFamily: "inherit", color: C.violet, fontStyle: "normal" }}>תוצאות.</em></>,
-              <>אני מגיעה מעולם אחר. עשור פלוס בעיתונות ובדיגיטל לימד אותי שלכל אחד יש סיפור, רק שלפעמים צריך לחפור עמוק כדי להגיע{" "}<em style={{ fontFamily: "inherit", color: C.violet, fontStyle: "normal" }}>לג׳וס האמיתי.</em></>,
-              <>אז אני מציעה שתעצרו רגע.</>,
-              <>כדי לרוץ לטווח ארוך, צריך להבין מי אתם, מה הסופר פאוור שאתם מביאים לשולחן, ומה ייקח אתכם רחוק יותר מאלה שרצים במסלולים מקבילים.</>,
-            ].map((para, i) => (
-              <p key={i} style={{
-                fontFamily: "var(--font-heading)",
-                fontWeight: 400,
-                fontSize: "clamp(20px,2vw,27px)",
-                lineHeight: 1.5,
-                letterSpacing: "-0.012em",
-                margin: "0 0 22px",
-                color: C.ink,
-              }}>
-                {para}
-              </p>
-            ))}
-
-            {/* thesis — bordered */}
-            <p style={{
+          {/* body paragraphs */}
+          {[
+            <>התרגלנו לקצב אחר. בריפים קצרים. קמפיינים מהירים. שורות תחתונות.{" "}<em style={{ fontFamily: "inherit", color: C.violet, fontStyle: "normal" }}>תוצאות.</em></>,
+            <>אני מגיעה מעולם אחר. עשור פלוס בעיתונות ובדיגיטל לימד אותי שלכל אחד יש סיפור, רק שלפעמים צריך לחפור עמוק כדי להגיע{" "}<em style={{ fontFamily: "inherit", color: C.violet, fontStyle: "normal" }}>לג׳וס האמיתי.</em></>,
+            <>אז אני מציעה שתעצרו רגע.</>,
+            <>כדי לרוץ לטווח ארוך, צריך להבין מי אתם, מה הסופר פאוור שאתם מביאים לשולחן, ומה ייקח אתכם רחוק יותר מאלה שרצים במסלולים מקבילים.</>,
+          ].map((para, i) => (
+            <p key={i} className={`reveal d${(i % 3) + 1}`} style={{
               fontFamily: "var(--font-heading)",
-              fontWeight: 700,
+              fontWeight: 400,
               fontSize: "clamp(20px,2vw,27px)",
               lineHeight: 1.5,
               letterSpacing: "-0.012em",
-              borderTop: `1px solid ${C.line2}`,
-              borderBottom: `1px solid ${C.line2}`,
-              padding: "28px 0",
-              margin: "32px 0 48px",
+              margin: "0 0 22px",
               color: C.ink,
             }}>
-              מותג בלי זהות הוא פשוט מוצר. ארגון בלי סיפור הוא רק עוד מקום.
+              {para}
             </p>
+          ))}
 
-            {/* signature */}
-            <div style={{
-              fontFamily: "var(--font-heading)",
-              fontWeight: 400,
-              color: C.violet,
-              fontSize: 18,
-              margin: "-16px 0 32px",
-            }}>
-              — אילונה
-            </div>
+          {/* thesis — bordered */}
+          <p className="reveal" style={{
+            fontFamily: "var(--font-heading)",
+            fontWeight: 700,
+            fontSize: "clamp(20px,2vw,27px)",
+            lineHeight: 1.5,
+            letterSpacing: "-0.012em",
+            borderTop: `1px solid ${C.line2}`,
+            borderBottom: `1px solid ${C.line2}`,
+            padding: "28px 0",
+            margin: "32px 0 48px",
+            color: C.ink,
+          }}>
+            מותג בלי זהות הוא פשוט מוצר. ארגון בלי סיפור הוא רק עוד מקום.
+          </p>
 
-            {/* cta-row */}
-            <div style={{
-              marginTop: 8,
-              display: "grid",
-              gridTemplateColumns: "1fr auto",
-              gap: 32,
-              alignItems: "flex-end",
-            }}>
-              <p style={{
-                fontFamily: "var(--font-heading)",
-                fontWeight: 700,
-                fontSize: "clamp(22px,2.4vw,32px)",
-                lineHeight: 1.22,
-                letterSpacing: "-0.018em",
-                margin: 0,
-                maxWidth: "24ch",
-              }}>
-                רוצים לבנות מותג{" "}
-                <em style={{ fontStyle: "normal", color: C.violet, fontWeight: 400 }}>שאי אפשר להעתיק?</em>
-              </p>
-              <CtaButton href="mailto:abramsonilona@gmail.com" acid>שלחו לי הודעה</CtaButton>
-            </div>
+          {/* signature */}
+          <div style={{
+            fontFamily: "var(--font-heading)",
+            fontWeight: 400,
+            color: C.violet,
+            fontSize: 18,
+            margin: "-16px 0 32px",
+          }}>
+            — אילונה
           </div>
-        </ScrollReveal>
+
+          {/* cta-row — bottom CTA */}
+          <div className="reveal" style={{
+            marginTop: 8,
+            display: "grid",
+            gridTemplateColumns: "1fr auto",
+            gap: 32,
+            alignItems: "flex-end",
+          }}>
+            <p style={{
+              fontFamily: "var(--font-heading)",
+              fontWeight: 700,
+              fontSize: "clamp(22px,2.4vw,32px)",
+              lineHeight: 1.22,
+              letterSpacing: "-0.018em",
+              margin: 0,
+              maxWidth: "24ch",
+            }}>
+              רוצים לבנות מותג{" "}
+              <em style={{ fontStyle: "normal", color: C.violet, fontWeight: 400 }}>שאי אפשר להעתיק?</em>
+            </p>
+            <CtaButton href="mailto:abramsonilona@gmail.com" acid>שלחו לי הודעה</CtaButton>
+          </div>
+        </div>
       </section>
 
       {/* ══ PORTFOLIO BENTO ═══════════════════════════════════════════ */}
@@ -416,45 +414,43 @@ export default function HomePage() {
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 56px" }}>
 
           {/* work-head */}
-          <ScrollReveal>
-            <div style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "baseline",
-              paddingBottom: 32,
-              marginBottom: 24,
-              borderBottom: `1px solid ${C.line}`,
+          <div style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "baseline",
+            paddingBottom: 32,
+            marginBottom: 24,
+            borderBottom: `1px solid ${C.line}`,
+          }}>
+            <h2 className="reveal" style={{
+              fontFamily: "var(--font-heading)",
+              fontWeight: 700,
+              fontSize: "clamp(40px,4.6vw,64px)",
+              lineHeight: 1,
+              letterSpacing: "-0.025em",
+              margin: 0,
             }}>
-              <h2 style={{
-                fontFamily: "var(--font-heading)",
-                fontWeight: 700,
-                fontSize: "clamp(40px,4.6vw,64px)",
-                lineHeight: 1,
-                letterSpacing: "-0.025em",
-                margin: 0,
-              }}>
-                <em style={{
-                  fontFamily: "var(--font-display-en)",
-                  fontStyle: "italic",
-                  fontWeight: 300,
-                  color: C.violet,
-                  marginLeft: 14,
-                }}>
-                  selected.
-                </em>
-                {" "}פרויקטים
-              </h2>
-              <div style={{
-                fontFamily: "var(--font-body-en)",
-                fontSize: 13,
-                color: C.ink3,
+              <em style={{
+                fontFamily: "var(--font-display-en)",
+                fontStyle: "italic",
                 fontWeight: 300,
-                letterSpacing: "0.03em",
+                color: C.violet,
+                marginLeft: 14,
               }}>
-                2019 — 2025 · 14 brands
-              </div>
+                selected.
+              </em>
+              {" "}פרויקטים
+            </h2>
+            <div style={{
+              fontFamily: "var(--font-body-en)",
+              fontSize: 13,
+              color: C.ink3,
+              fontWeight: 300,
+              letterSpacing: "0.03em",
+            }}>
+              2019 — 2025 · 14 brands
             </div>
-          </ScrollReveal>
+          </div>
 
           {/* bento grid */}
           <div style={{
@@ -464,8 +460,8 @@ export default function HomePage() {
             gridAutoFlow: "dense",
             gap: 14,
           }}>
-            {tiles.map(tile => (
-              <BentoTile key={tile.id} tile={tile} />
+            {tiles.map((tile, i) => (
+              <BentoTile key={tile.id} tile={tile} stagger={i % 3} />
             ))}
           </div>
         </div>
@@ -473,46 +469,44 @@ export default function HomePage() {
 
       {/* ══ SERVICES ══════════════════════════════════════════════════ */}
       <section style={{ padding: "0 0 128px" }}>
-        <ScrollReveal>
-          <div style={{ maxWidth: 1120, margin: "0 auto", padding: "0 56px" }}>
-            <h2 style={{
-              fontFamily: "var(--font-heading)",
-              fontWeight: 700,
-              fontSize: "clamp(36px,4vw,56px)",
-              letterSpacing: "-0.022em",
-              margin: "0 0 36px",
+        <div style={{ maxWidth: 1120, margin: "0 auto", padding: "0 56px" }}>
+          <h2 className="reveal" style={{
+            fontFamily: "var(--font-heading)",
+            fontWeight: 700,
+            fontSize: "clamp(36px,4vw,56px)",
+            letterSpacing: "-0.022em",
+            margin: "0 0 36px",
+          }}>
+            <em style={{
+              fontFamily: "var(--font-display-en)",
+              fontStyle: "italic",
+              fontWeight: 300,
+              color: C.violet,
+              marginLeft: 12,
             }}>
-              <em style={{
-                fontFamily: "var(--font-display-en)",
-                fontStyle: "italic",
-                fontWeight: 300,
-                color: C.violet,
-                marginLeft: 12,
-              }}>
-                what
-              </em>
-              {" "}אני עושה
-            </h2>
+              what
+            </em>
+            {" "}אני עושה
+          </h2>
 
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
-              borderTop: `1px solid ${C.ink}`,
-            }}>
-              {services.map((s, i) => (
-                <div key={s.n} style={{
-                  padding: 28,
-                  borderBottom: `1px solid ${C.line}`,
-                  borderRight: (i + 1) % 4 !== 0 ? `1px solid ${C.line}` : undefined,
-                }}>
-                  <div style={{ fontFamily: "var(--font-body-en)", fontSize: 11, color: C.ink3, letterSpacing: "0.1em", fontWeight: 300 }}>{s.n}</div>
-                  <h3 style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 22, lineHeight: 1.2, margin: "0 0 8px", letterSpacing: "-0.015em" }}>{s.title}</h3>
-                  <p style={{ fontSize: 14, color: C.ink2, margin: "8px 0 0", lineHeight: 1.5 }}>{s.body}</p>
-                </div>
-              ))}
-            </div>
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(4, 1fr)",
+            borderTop: `1px solid ${C.ink}`,
+          }}>
+            {services.map((s, i) => (
+              <div key={s.n} style={{
+                padding: 28,
+                borderBottom: `1px solid ${C.line}`,
+                borderRight: (i + 1) % 4 !== 0 ? `1px solid ${C.line}` : undefined,
+              }}>
+                <div style={{ fontFamily: "var(--font-body-en)", fontSize: 11, color: C.ink3, letterSpacing: "0.1em", fontWeight: 300 }}>{s.n}</div>
+                <h3 style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 22, lineHeight: 1.2, margin: "0 0 8px", letterSpacing: "-0.015em" }}>{s.title}</h3>
+                <p style={{ fontSize: 14, color: C.ink2, margin: "8px 0 0", lineHeight: 1.5 }}>{s.body}</p>
+              </div>
+            ))}
           </div>
-        </ScrollReveal>
+        </div>
       </section>
 
       {/* ══ ABOUT TEASER ══════════════════════════════════════════════ */}
@@ -521,8 +515,7 @@ export default function HomePage() {
         background: C.cream,
         borderTop: `1px solid ${C.line}`,
       }}>
-        <ScrollReveal>
-          <div style={{
+        <div className="reveal" style={{
             display: "grid",
             gridTemplateColumns: "1fr 1.6fr",
             gap: 72,
@@ -584,7 +577,6 @@ export default function HomePage() {
               </p>
             </div>
           </div>
-        </ScrollReveal>
       </section>
 
       <Footer />
