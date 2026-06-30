@@ -9,11 +9,39 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 const navLinks = [
   { href: "/projects", label: "פרויקטים" },
   { href: "/about", label: "אודות" },
-  { href: "mailto:abramsonilona@gmail.com", label: "בואו נדבר", external: true },
 ];
 
 const INK   = "#0a1a0d";
 const CREAM = "#fcf7f4";
+const NEON  = "#e0ff5c";
+
+function CtaPill({ style }: { style?: React.CSSProperties }) {
+  return (
+    <a
+      href="#contact"
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 7,
+        background: NEON,
+        color: INK,
+        fontFamily: "var(--font-body)",
+        fontWeight: 700,
+        fontSize: "0.875rem",
+        padding: "9px 20px",
+        borderRadius: 30,
+        textDecoration: "none",
+        transition: "filter 0.15s ease",
+        ...style,
+      }}
+      onMouseEnter={e => ((e.currentTarget as HTMLElement).style.filter = "brightness(0.96)")}
+      onMouseLeave={e => ((e.currentTarget as HTMLElement).style.filter = "none")}
+    >
+      <span aria-hidden="true" style={{ fontWeight: 700, fontSize: "1rem", lineHeight: 1 }}>+</span>
+      יש לי פרויקט
+    </a>
+  );
+}
 
 export default function Navigation() {
   const pathname  = usePathname();
@@ -124,6 +152,7 @@ export default function Navigation() {
                 </Link>
               )
             )}
+            <CtaPill />
           </nav>
         )}
 
@@ -187,6 +216,7 @@ export default function Navigation() {
                 </Link>
               )
             )}
+            <CtaPill style={{ alignSelf: "flex-start" }} />
           </motion.nav>
         )}
       </AnimatePresence>

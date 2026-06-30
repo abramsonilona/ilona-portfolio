@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import Footer from "@/components/layout/Footer";
+import Intro from "@/components/Intro";
+import Hero from "@/components/Hero";
 
 /* ─── colour tokens matching globals.css ───────────────────────────── */
 const C = {
@@ -303,80 +305,9 @@ export default function HomePage() {
   return (
     <div style={{ background: C.cream, color: C.ink, direction: "rtl" }}>
 
-      {/* ══ HERO ══════════════════════════════════════════════════════ */}
-      <section style={{ padding: "120px 0 96px" }}>
-        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 56px" }}>
-
-          {/* italic label */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.05 }}
-            style={{
-              fontFamily: "var(--font-display-en)",
-              fontStyle: "italic",
-              fontWeight: 300,
-              fontSize: 18,
-              color: C.violet,
-              marginBottom: 28,
-              letterSpacing: "0.01em",
-            }}
-          >
-            brand &amp; verbal strategist
-          </motion.div>
-
-          {/* h1 */}
-          <motion.h1
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-            style={{
-              fontFamily: "var(--font-heading)",
-              fontWeight: 700,
-              fontSize: "clamp(56px,7.4vw,124px)",
-              lineHeight: 1.02,
-              letterSpacing: "-0.03em",
-              margin: 0,
-              maxWidth: "18ch",
-              color: C.ink,
-            }}
-          >
-            לחקור DNA של מותגים{" "}
-            <span style={{ color: C.violet, fontWeight: 400 }}>זה לא לכל אחד.</span>
-          </motion.h1>
-
-          {/* hero-sub strip */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.45 }}
-            style={{
-              marginTop: 56,
-              display: "grid",
-              gridTemplateColumns: "1fr auto",
-              gap: 48,
-              alignItems: "center",
-              borderTop: `1px solid ${C.line}`,
-              paddingTop: 40,
-            }}
-          >
-            <p style={{
-              fontFamily: "var(--font-heading)",
-              fontWeight: 700,
-              fontSize: "clamp(22px,2.6vw,34px)",
-              lineHeight: 1.2,
-              letterSpacing: "-0.018em",
-              margin: 0,
-              maxWidth: "22ch",
-              color: C.ink,
-            }}>
-              בשלים לתהליך עומק{" "}
-              <em style={{ fontStyle: "normal", color: C.violet, fontWeight: 400 }}>שייקח אתכם רחוק?</em>
-            </p>
-            <CtaButton href="mailto:abramsonilona@gmail.com" acid>שלחו לי הודעה</CtaButton>
-          </motion.div>
-        </div>
-      </section>
+      {/* ══ INTRO + HERO ═════════════════════════════════════════════ */}
+      <Intro />
+      <Hero />
 
       {/* ══ A WORD ════════════════════════════════════════════════════ */}
       <section style={{ background: C.cream, padding: "128px 0", borderTop: `1px solid ${C.line}` }}>
