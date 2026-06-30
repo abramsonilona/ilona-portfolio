@@ -80,6 +80,7 @@ export default function Hero() {
 
         @media (max-width:640px){
           .hero-${uid} .hero-kicker{letter-spacing:-1px;}
+          .hero-${uid} .hero-accent svg{left:0;right:0;width:100%;}
         }
       `}</style>
     </section>

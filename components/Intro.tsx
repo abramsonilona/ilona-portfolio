@@ -101,6 +101,7 @@ export default function Intro() {
           position:fixed;inset:0;z-index:200;background:${COLORS.cream};
           display:flex;align-items:center;justify-content:center;padding:24px;
           transition:transform 1.15s cubic-bezier(.76,0,.24,1);
+          overflow:hidden;max-width:100vw;
           --font-display:"SimplerPro","Heebo",system-ui,sans-serif;
           --font-serif:"EditorNote","Cormorant Garamond",serif;
         }
@@ -115,7 +116,7 @@ export default function Intro() {
         .intro-text{
           position:relative;direction:ltr;font-family:var(--font-display);font-weight:700;
           font-size:clamp(28px,6.5vw,64px);line-height:1.1;letter-spacing:-1.8px;
-          color:${COLORS.darkGreen};text-align:center;max-width:18ch;width:100%;
+          color:${COLORS.darkGreen};text-align:center;max-width:min(18ch,90vw);width:100%;
           overflow-wrap:break-word;word-break:break-word;
           opacity:0;transform:translateY(12px);
           transition:opacity 1s ease,transform 1s ease;
@@ -139,6 +140,11 @@ export default function Intro() {
           color:rgba(0,38,7,.45);background:none;border:none;cursor:pointer;
         }
         .intro-skip:hover{color:${COLORS.darkGreen};}
+
+        @media (max-width:640px){
+          .intro-text{letter-spacing:-0.8px;}
+          .intro-scribble svg{left:0;right:0;width:100%;}
+        }
 
         @media (prefers-reduced-motion:reduce){
           .intro-curtain,.intro-text,.intro-scribble svg path{transition:none;}
