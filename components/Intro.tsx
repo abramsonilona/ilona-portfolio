@@ -114,8 +114,9 @@ export default function Intro() {
 
         .intro-text{
           position:relative;direction:ltr;font-family:var(--font-display);font-weight:700;
-          font-size:clamp(32px,6.5vw,64px);line-height:1.1;letter-spacing:-1.8px;
-          color:${COLORS.darkGreen};text-align:center;max-width:18ch;
+          font-size:clamp(28px,6.5vw,64px);line-height:1.1;letter-spacing:-1.8px;
+          color:${COLORS.darkGreen};text-align:center;max-width:18ch;width:100%;
+          overflow-wrap:break-word;word-break:break-word;
           opacity:0;transform:translateY(12px);
           transition:opacity 1s ease,transform 1s ease;
         }

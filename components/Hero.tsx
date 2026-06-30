@@ -45,7 +45,8 @@ export default function Hero() {
         .hero-${uid}{
           position:relative;min-height:100svh;overflow:hidden;background:${COLORS.cream};
           display:flex;flex-direction:column;align-items:center;justify-content:center;
-          text-align:center;padding:120px clamp(24px,6vw,72px) 90px;
+          text-align:center;padding:120px clamp(16px,5vw,72px) 90px;
+          width:100%;max-width:100vw;box-sizing:border-box;
           --font-display:"SimplerPro","Heebo",system-ui,sans-serif;
           --font-serif:"EditorNote","Cormorant Garamond",serif;
         }
@@ -57,12 +58,13 @@ export default function Hero() {
             radial-gradient(80% 60% at 80% 84%, rgba(232,212,255,.18), rgba(232,212,255,0) 62%);
         }
 
-        .hero-${uid} .hero-content{position:relative;z-index:2;max-width:900px;}
+        .hero-${uid} .hero-content{position:relative;z-index:2;width:100%;max-width:900px;}
 
         .hero-${uid} .hero-kicker{
           direction:ltr;font-family:var(--font-display);font-weight:700;
-          font-size:clamp(52px,11vw,124px);line-height:1.0;letter-spacing:-3px;
+          font-size:clamp(34px,9vw,124px);line-height:1.0;letter-spacing:-3px;
           color:${COLORS.darkGreen};margin-bottom:26px;
+          overflow-wrap:break-word;word-break:break-word;max-width:100%;
         }
         .hero-${uid} .hero-accent{position:relative;display:inline-block;}
         .hero-${uid} .hero-accent svg{
@@ -77,7 +79,7 @@ export default function Hero() {
         .hero-${uid} .hero-sub b{font-weight:700;color:${COLORS.darkGreen};}
 
         @media (max-width:640px){
-          .hero-${uid} .hero-kicker{letter-spacing:-1.5px;}
+          .hero-${uid} .hero-kicker{letter-spacing:-1px;}
         }
       `}</style>
     </section>
