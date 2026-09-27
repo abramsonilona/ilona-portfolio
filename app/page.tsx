@@ -268,7 +268,7 @@ const tiles: Tile[] = [
     tag: "קופי לאתר מכירה · EN+HE",
   },
   {
-    id: "reverie", href: "/projects/snug", size: "md",
+    id: "reverie", href: "/projects/reverie", size: "md",
     visual: "v-lav", logoStyle: "script", logo: "Rêverie",
     h3: <>לגרום לכם לחלום <Acc>על השוקולד הזה.</Acc></>,
     tag: "ניימינג + טאגליין · Rêverie · שוקולד",
