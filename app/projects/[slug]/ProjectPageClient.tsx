@@ -661,10 +661,303 @@ function GenericLayout({ project }: { project: Project }) {
   );
 }
 
+/* ── Shapira Beer hover image ────────────────────────────────────── */
+function HoverImage({ src, hoverSrc, alt, label }: { src: string; hoverSrc: string; alt: string; label: string }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{ position: "relative", cursor: "default" }}
+    >
+      <img
+        src={hovered ? hoverSrc : src}
+        alt={alt}
+        style={{ width: "100%", display: "block", height: "auto", transition: "opacity 0.3s" }}
+      />
+      <p style={{
+        fontFamily: "var(--font-heading)",
+        fontWeight: 400,
+        fontSize: 13,
+        color: "#87908a",
+        textAlign: "center",
+        margin: "10px 0 0",
+        letterSpacing: "0.05em",
+        direction: "rtl",
+      }}>{label}</p>
+    </div>
+  );
+}
+
+/* ── Shapira Beer layout ─────────────────────────────────────────── */
+function ShapiraBeerLayout({ project }: { project: Project }) {
+  const isMobile = useIsMobile();
+  const heroRef  = useRef<HTMLVideoElement>(null);
+  const [heroPlaying, setHeroPlaying] = useState(true);
+
+  const hPad = isMobile ? 20 : 108;
+  const gap  = 24;
+  const B    = "/projects/shapira-beer";
+
+  const bottles = [
+    { img: `${B}/Bira-Shapira-01.png`, label: "Wheat" },
+    { img: `${B}/Bira-Shapira-02.png`, label: "IPA" },
+    { img: `${B}/Bira-Shapira-03.png`, label: "Hoppy Lager" },
+  ];
+
+  const screenshots = [
+    `${B}/Bira-Shapira-04.png`,
+    `${B}/Bira-Shapira-05.png`,
+    `${B}/Bira-Shapira-07.png`,
+    `${B}/Bira-Shapira-08.png`,
+  ];
+
+  const popups = [
+    `${B}/Bira-Shapira-09.png`,
+    `${B}/Bira-Shapira-10.png`,
+  ];
+
+  const ingredients = [
+    { img: `${B}/Bira-Shapira-12.png`, hover: `${B}/Bira-Shapira-12-hover.png`, mobileImg: `${B}/Bira-Shapira-Mobile-12.png`, mobileHover: `${B}/Bira-Shapira-Mobile-12-hover.png`, label: "לחות" },
+    { img: `${B}/Bira-Shapira-13.png`, hover: `${B}/Bira-Shapira-13-hover.png`, mobileImg: `${B}/Bira-Shapira-Mobile-13.png`, mobileHover: `${B}/Bira-Shapira-Mobile-13-hover.png`, label: "כשות" },
+    { img: `${B}/Bira-Shapira-14.png`, hover: `${B}/Bira-Shapira-14-hover.png`, mobileImg: `${B}/Bira-Shapira-Mobile-14.png`, mobileHover: `${B}/Bira-Shapira-Mobile-14-hover.png`, label: "שעורים" },
+    { img: `${B}/Bira-Shapira-15.png`, hover: `${B}/Bira-Shapira-15-hover.png`, mobileImg: `${B}/Bira-Shapira-Mobile-15.png`, mobileHover: `${B}/Bira-Shapira-Mobile-15-hover.png`, label: "מים" },
+  ];
+
+  const descParas = project.description.split("\n\n");
+  const solParas  = project.solution.split("\n\n");
+
+  return (
+    <div style={{ background: C.cream, color: C.ink, direction: "rtl" }}>
+
+      {/* ── Hero strip ── */}
+      <div
+        style={{
+          position: "relative",
+          marginTop: isMobile ? 47 : 53,
+          height: isMobile ? "max(120px, 8.5vw)" : "8.5vw",
+          overflow: "hidden",
+          background: "#111",
+          cursor: "pointer",
+        }}
+        onClick={() => {
+          const v = heroRef.current;
+          if (!v) return;
+          if (v.paused) { v.play(); setHeroPlaying(true); }
+          else { v.pause(); setHeroPlaying(false); }
+        }}
+      >
+        <video
+          ref={heroRef}
+          autoPlay muted loop playsInline
+          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+        >
+          {isMobile
+            ? <source src={project.mobileVideoUrl} type="video/mp4" />
+            : <source src={project.videoUrl} type="video/mp4" />
+          }
+        </video>
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+          <div style={{ width: 48, height: 48, borderRadius: "50%", background: "rgba(255,255,255,0.88)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {heroPlaying
+              ? <svg width="14" height="14" viewBox="0 0 24 24" fill="#111"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+              : <svg width="14" height="14" viewBox="0 0 24 24" fill="#111" style={{ marginRight: -3 }}><polygon points="5,3 19,12 5,21"/></svg>
+            }
+          </div>
+        </div>
+      </div>
+
+      {/* ── Title block ── */}
+      <section style={{ padding: isMobile ? `56px ${hPad}px 0` : `100px ${hPad}px 0` }}>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          style={{ textAlign: "right" }}
+        >
+          <h1 style={{
+            fontFamily: "var(--font-heading)",
+            fontWeight: 300,
+            fontSize: isMobile ? "clamp(40px,11vw,60px)" : 72,
+            lineHeight: 1,
+            letterSpacing: "-0.02em",
+            color: C.ink,
+            margin: "0 0 12px",
+          }}>
+            {project.title}
+          </h1>
+          <p style={{
+            fontFamily: "var(--font-heading)",
+            fontWeight: 400,
+            fontSize: isMobile ? 13 : 15,
+            color: C.ink3,
+            margin: 0,
+          }}>
+            {project.category}
+          </p>
+        </motion.div>
+      </section>
+
+      {/* ── Text block ── */}
+      <section style={{ padding: isMobile ? `40px ${hPad}px 64px` : `56px ${hPad}px 80px` }}>
+        <div style={{ textAlign: "right", maxWidth: 1130 }}>
+          {descParas.map((para, i) => (
+            <p key={i} style={{
+              fontFamily: "var(--font-heading)",
+              fontWeight: 400,
+              fontSize: isMobile ? 15 : 16,
+              lineHeight: 1.85,
+              color: C.ink2,
+              margin: "0 0 14px",
+            }}>{para}</p>
+          ))}
+          <h2 style={{
+            fontFamily: "var(--font-heading)",
+            fontWeight: 700,
+            fontSize: isMobile ? 18 : "clamp(18px,1.4vw,22px)",
+            lineHeight: 1.3,
+            color: C.ink,
+            margin: "32px 0 16px",
+          }}>
+            {solParas[0]}
+          </h2>
+          {solParas.slice(1).map((para, i) => (
+            <p key={i} style={{
+              fontFamily: "var(--font-heading)",
+              fontWeight: 400,
+              fontSize: isMobile ? 15 : 16,
+              lineHeight: 1.85,
+              color: C.ink2,
+              margin: "0 0 14px",
+            }}>{para}</p>
+          ))}
+          <div style={{ marginTop: 28 }}>
+            <p style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 14, color: C.ink, margin: "0 0 6px" }}>
+              מיתוג ועיצוב
+            </p>
+            <a
+              href="#"
+              style={{ fontFamily: "var(--font-body-en)", fontWeight: 300, fontSize: 15, color: C.ink, textDecoration: "underline", textUnderlineOffset: 3, letterSpacing: "0.02em", transition: "color 0.2s" }}
+              onMouseEnter={e => ((e.target as HTMLElement).style.color = C.violet)}
+              onMouseLeave={e => ((e.target as HTMLElement).style.color = C.ink)}
+            >
+              Idan Shapira
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ── "הבירות של שפירא" — 3 bottles ── */}
+      <section style={{
+        padding: isMobile ? `56px ${hPad}px` : `80px ${hPad}px`,
+        background: "#f5f0e8",
+        textAlign: "center",
+      }}>
+        <h2 style={{
+          fontFamily: "var(--font-heading)",
+          fontWeight: 700,
+          fontSize: isMobile ? "clamp(28px,8vw,42px)" : "clamp(36px,3.5vw,56px)",
+          color: "#7a5c2e",
+          margin: "0 0 8px",
+          letterSpacing: "-0.01em",
+        }}>
+          הבירות של שפירא
+        </h2>
+        <p style={{
+          fontFamily: "var(--font-heading)",
+          fontWeight: 400,
+          fontSize: isMobile ? 13 : 15,
+          color: "#9a8060",
+          margin: "0 0 48px",
+          letterSpacing: "0.08em",
+        }}>
+          בירות הבית
+        </p>
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr",
+          gap: isMobile ? 40 : 48,
+          maxWidth: 960,
+          margin: "0 auto",
+        }}>
+          {bottles.map(({ img, label }) => (
+            <div key={label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+              <img
+                src={img}
+                alt={label}
+                style={{ width: isMobile ? "60%" : "70%", height: "auto", display: "block" }}
+              />
+              <p style={{
+                fontFamily: "var(--font-body-en)",
+                fontWeight: 400,
+                fontSize: isMobile ? 13 : 14,
+                color: "#9a8060",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                margin: 0,
+              }}>{label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Screenshots 2×2 grid ── */}
+      <section style={{ padding: isMobile ? `48px 0` : `80px ${hPad}px` }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap }}>
+          {screenshots.map((src, i) => (
+            <img key={i} src={src} alt={`Shapira website ${i + 1}`} style={{ width: "100%", display: "block", height: "auto" }} />
+          ))}
+        </div>
+      </section>
+
+      {/* ── Popups row ── */}
+      <section style={{ padding: isMobile ? `0 ${hPad}px 48px` : `0 ${hPad}px 80px` }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap }}>
+          {popups.map((src, i) => (
+            <img key={i} src={src} alt={`Shapira popup ${i + 1}`} style={{ width: "100%", display: "block", height: "auto" }} />
+          ))}
+        </div>
+      </section>
+
+      {/* ── "מה עושים עם בירה?" — 2×2 with hover ── */}
+      <section style={{
+        padding: isMobile ? `48px ${hPad}px 64px` : `64px ${hPad}px 96px`,
+        background: "#f5f0e8",
+        textAlign: "center",
+      }}>
+        <h2 style={{
+          fontFamily: "var(--font-heading)",
+          fontWeight: 700,
+          fontSize: isMobile ? "clamp(24px,7vw,38px)" : "clamp(32px,3vw,48px)",
+          color: "#7a5c2e",
+          margin: "0 0 48px",
+          letterSpacing: "-0.01em",
+        }}>
+          מה עושים עם בירה?
+        </h2>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap }}>
+          {ingredients.map(({ img, hover, mobileImg, mobileHover, label }) => (
+            <HoverImage
+              key={label}
+              src={isMobile ? mobileImg : img}
+              hoverSrc={isMobile ? mobileHover : hover}
+              alt={label}
+              label={label}
+            />
+          ))}
+        </div>
+      </section>
+
+      <ProjectFooter project={project} />
+    </div>
+  );
+}
+
 /* ── Router ──────────────────────────────────────────────────────── */
 export default function ProjectPageClient({ project }: Props) {
   if (project.slug === "reverie") return <ReverieLayout project={project} />;
   if (project.slug === "deesse")      return <DeesseLayout     project={project} />;
   if (project.slug === "urban-wise") return <UrbanWiseLayout  project={project} />;
+  if (project.slug === "shapira-beer") return <ShapiraBeerLayout project={project} />;
   return <GenericLayout project={project} />;
 }
