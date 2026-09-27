@@ -256,7 +256,7 @@ const tiles: Tile[] = [
     tag: "שפה + קופי לאתר",
   },
   {
-    id: "deesse", href: "/projects/myjool",
+    id: "deesse", href: "/projects/deesse",
     visual: "v-lav-2", logoStyle: "script", logo: "Déesse",
     h3: <>השם <Acc>שברא את עצמו.</Acc></>,
     tag: "ניימינג + טאגליין",
