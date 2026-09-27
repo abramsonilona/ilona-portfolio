@@ -941,11 +941,234 @@ function ShapiraBeerLayout({ project }: { project: Project }) {
   );
 }
 
+/* ── Bira Shapira layout ─────────────────────────────────────────── */
+const BODY_TEXT = `אתם יודעים מה יותר קשה מללדת? לכתוב אתר של מותג בירה בחודש תשיעי,
+כשאלכוהול מרגיש כמו זיכרון רחוק. אבל מי יכול לסרב לווייב של שפירא?
+שפירא הוא מותג בירות קראפט ישראלי שמביא איתו וייב ירושלמי ואופי אותנטי.
+שפירא זה החבר הזה שצריך בכל חבורה: חכם שיודע הכל, קצת ציני, לא צוחק מהבדיחות של עצמו,
+ואחד כזה שיוריד בירה אחרי בירה ועדיין יישאר און פוינט.
+אחרי שהגדרתי את קווי האופי שלו, ניגשתי לפרקטיקה – ותרגמתי את הסטייל המאוד מאופיין הזה
+לקול וטון שמרגיש עקבי על פני כל האתר – מדף הבית ועד התיאור האישיותי של כל בירה.
+יצרתי קול ישיר ואינטליגנטי, וטון שמשדר ביטחון שקט, עם הומור יבש ומינון מדויק של ציניות.
+כל בירה קיבלה את האישיות הספציפית שלה, וכל עמוד מדבר בדיוק כמו החבר הירושלמי שתמיד רציתם שיהיה לכם.`;
+
+function BiraShapiraLayout({ project }: { project: Project }) {
+  const isMobile = useIsMobile();
+  const heroRef  = useRef<HTMLVideoElement>(null);
+  const [heroPlaying, setHeroPlaying] = useState(true);
+
+  const hPad = isMobile ? 20 : 108;
+  const B    = "/projects/shapira-beer";
+
+  const BEIGE = "#EAE2D6";
+
+  const screenshots = [
+    `${B}/Bira-Shapira-02.png`,
+    `${B}/Bira-Shapira-03.png`,
+    `${B}/Bira-Shapira-04.png`,
+    `${B}/Bira-Shapira-05.png`,
+    `${B}/Bira-Shapira-07.png`,
+    `${B}/Bira-Shapira-08.png`,
+  ];
+
+  const ingredients = [
+    { img: `${B}/Bira-Shapira-12.png`, hover: `${B}/Bira-Shapira-12-hover.png`, label: "לחות" },
+    { img: `${B}/Bira-Shapira-13.png`, hover: `${B}/Bira-Shapira-13-hover.png`, label: "כשות" },
+    { img: `${B}/Bira-Shapira-14.png`, hover: `${B}/Bira-Shapira-14-hover.png`, label: "שעורים" },
+    { img: `${B}/Bira-Shapira-15.png`, hover: `${B}/Bira-Shapira-15-hover.png`, label: "מים" },
+  ];
+
+  const paraStyle: React.CSSProperties = {
+    fontFamily: "var(--font-heading)",
+    fontWeight: 400,
+    fontSize: isMobile ? 15 : 16,
+    lineHeight: 1.85,
+    color: C.ink2,
+    margin: "0 0 14px",
+    whiteSpace: isMobile ? "normal" : "pre-line",
+    textAlign: "right",
+  };
+
+  return (
+    <div style={{ background: C.cream, color: C.ink, direction: "rtl" }}>
+
+      {/* ── Hero strip ── */}
+      <div
+        style={{
+          position: "relative",
+          marginTop: isMobile ? 47 : 53,
+          height: isMobile ? "max(120px, 8.5vw)" : "8.5vw",
+          overflow: "hidden",
+          background: "#111",
+          cursor: "pointer",
+        }}
+        onClick={() => {
+          const v = heroRef.current;
+          if (!v) return;
+          if (v.paused) { v.play(); setHeroPlaying(true); }
+          else { v.pause(); setHeroPlaying(false); }
+        }}
+      >
+        <video
+          ref={heroRef}
+          autoPlay muted loop playsInline
+          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+        >
+          {isMobile
+            ? <source src={project.mobileVideoUrl} type="video/mp4" />
+            : <source src={project.videoUrl}       type="video/mp4" />
+          }
+        </video>
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+          <div style={{ width: 48, height: 48, borderRadius: "50%", background: "rgba(255,255,255,0.88)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {heroPlaying
+              ? <svg width="14" height="14" viewBox="0 0 24 24" fill="#111"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+              : <svg width="14" height="14" viewBox="0 0 24 24" fill="#111" style={{ marginRight: -3 }}><polygon points="5,3 19,12 5,21"/></svg>
+            }
+          </div>
+        </div>
+      </div>
+
+      {/* ── Title ── */}
+      <section style={{ padding: isMobile ? `56px ${hPad}px 0` : `100px ${hPad}px 0` }}>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          style={{ textAlign: "right" }}
+        >
+          <h1 style={{
+            fontFamily: "var(--font-heading)",
+            fontWeight: 300,
+            fontSize: isMobile ? "clamp(40px,11vw,60px)" : 72,
+            lineHeight: 1,
+            letterSpacing: "-0.02em",
+            color: C.ink,
+            margin: "0 0 12px",
+          }}>
+            {project.title}
+          </h1>
+          <p style={{
+            fontFamily: "var(--font-heading)",
+            fontWeight: 400,
+            fontSize: isMobile ? 13 : 15,
+            color: C.ink3,
+            margin: 0,
+          }}>
+            {project.category}
+          </p>
+        </motion.div>
+      </section>
+
+      {/* ── Text block ── */}
+      <section style={{ padding: isMobile ? `40px ${hPad}px 56px` : `56px ${hPad}px 80px` }}>
+        <div style={{ maxWidth: 1130, textAlign: "right" }}>
+          <h2 style={{
+            fontFamily: "var(--font-heading)",
+            fontWeight: 700,
+            fontSize: isMobile ? 18 : "clamp(18px,1.4vw,22px)",
+            lineHeight: 1.4,
+            color: C.ink,
+            margin: "0 0 20px",
+          }}>
+            מותר לכתוב, אסור לשתות – איך פגשתי את שפירא
+          </h2>
+          <p style={paraStyle}>{BODY_TEXT}</p>
+          <p style={{ ...paraStyle, whiteSpace: "normal", marginTop: 6 }}>
+            מומלץ לקרוא עם פיינט בצד, עדיף בכוס שיצאה ישר מהמקפיא.
+          </p>
+          <div style={{ marginTop: 32 }}>
+            <p style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 14, color: C.ink, margin: "0 0 6px" }}>
+              מיתוג ועיצוב
+            </p>
+            <a
+              href="#"
+              style={{ fontFamily: "var(--font-heading)", fontWeight: 400, fontSize: 15, color: C.ink, textDecoration: "underline", textUnderlineOffset: 3, transition: "color 0.2s" }}
+              onMouseEnter={e => ((e.target as HTMLElement).style.color = C.violet)}
+              onMouseLeave={e => ((e.target as HTMLElement).style.color = C.ink)}
+            >
+              סטודיו יותם בצלאל
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Section A: Beige — bottles card + 2×3 screenshots ── */}
+      <section style={{ background: BEIGE, padding: isMobile ? `48px 0` : `64px ${hPad}px` }}>
+        {/* Full-width bottles card */}
+        <img
+          src={isMobile ? `${B}/Bira-Shapira-Mobile-01.png` : `${B}/Bira-Shapira-01.png`}
+          alt="הבירות של שפירא"
+          style={{ width: "100%", display: "block", height: "auto" }}
+        />
+        {/* 2×3 grid */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+          gap: isMobile ? 0 : 44,
+          marginTop: isMobile ? 0 : 44,
+        }}>
+          {screenshots.map((src, i) => (
+            <img key={i} src={src} alt={`Shapira screen ${i + 1}`}
+              style={{ width: "100%", display: "block", height: "auto" }} />
+          ))}
+        </div>
+      </section>
+
+      {/* ── Section B: Cream — 2 popups centered ── */}
+      <section style={{
+        background: C.cream,
+        padding: isMobile ? `40px ${hPad}px` : `72px ${hPad}px`,
+        display: "flex",
+        flexDirection: isMobile ? "column" : "row",
+        justifyContent: "center",
+        alignItems: "flex-start",
+        gap: isMobile ? 24 : 64,
+        direction: "rtl",
+      }}>
+        <img src={`${B}/Bira-Shapira-09.png`} alt="פופאפ 1"
+          style={{ width: isMobile ? "100%" : "auto", maxWidth: 630, display: "block", height: "auto" }} />
+        <img src={`${B}/Bira-Shapira-10.png`} alt="פופאפ 2"
+          style={{ width: isMobile ? "100%" : "auto", maxWidth: 630, display: "block", height: "auto" }} />
+      </section>
+
+      {/* ── Section C: Beige — "מה עושים בירה?" banner + 2×2 grid ── */}
+      <section style={{ background: BEIGE }}>
+        {/* Banner */}
+        <img
+          src={isMobile ? `${B}/Bira-Shapira-Mobile-11.png` : `${B}/Bira-Shapira-11.png`}
+          alt="מה עושים בירה?"
+          style={{ width: "100%", display: "block", height: "auto" }}
+        />
+        {/* 2×2 tight grid */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 3,
+        }}>
+          {ingredients.map(({ img, hover, label }) => (
+            <HoverImage
+              key={label}
+              src={img}
+              hoverSrc={isMobile ? img : hover}
+              alt={label}
+              label=""
+            />
+          ))}
+        </div>
+      </section>
+
+      <ProjectFooter project={project} />
+    </div>
+  );
+}
+
 /* ── Router ──────────────────────────────────────────────────────── */
 export default function ProjectPageClient({ project }: Props) {
-  if (project.slug === "reverie") return <ReverieLayout project={project} />;
-  if (project.slug === "deesse")      return <DeesseLayout     project={project} />;
-  if (project.slug === "urban-wise") return <UrbanWiseLayout  project={project} />;
+  if (project.slug === "reverie")      return <ReverieLayout     project={project} />;
+  if (project.slug === "deesse")       return <DeesseLayout      project={project} />;
+  if (project.slug === "urban-wise")   return <UrbanWiseLayout   project={project} />;
   if (project.slug === "shapira-beer") return <ShapiraBeerLayout project={project} />;
+  if (project.slug === "bira-shapira") return <BiraShapiraLayout project={project} />;
   return <GenericLayout project={project} />;
 }

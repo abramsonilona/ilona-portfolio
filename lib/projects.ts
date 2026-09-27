@@ -21,6 +21,24 @@ export interface Project {
 
 export const projects: Project[] = [
   {
+    slug: "bira-shapira",
+    title: "בירה שפירא",
+    subtitle: "קול וטון | אפיון אתר | קופירייטינג | תוכן שיווקי",
+    category: "קול וטון | אפיון אתר | קופירייטינג | תוכן שיווקי",
+    year: "2024",
+    description: "",
+    challenge: "",
+    solution: "",
+    deliverables: [],
+    videoUrl: "/projects/shapira-beer/Desktop-Banner-BiraShapira.mp4",
+    mobileVideoUrl: "/projects/shapira-beer/Mobile-Banner-BiraShapira.mp4",
+    designerCredit: "סטודיו יותם בצלאל",
+    designerCreditLabel: "מיתוג ועיצוב",
+    tags: ["קול וטון", "F&B", "קופי", "אסטרטגיה"],
+    featured: true,
+    color: "#2d3a2e",
+  },
+  {
     slug: "shapira-beer",
     title: "בירה שפירא",
     subtitle: "קול יוצא | שפה מקומית | קופי לאתר | קונטנט",
