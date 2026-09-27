@@ -10,6 +10,7 @@ export interface Project {
   deliverables: string[];
   coverImage?: string;
   videoUrl?: string;
+  mobileVideoUrl?: string;
   images?: string[];
   designerCredit?: string;
   designerCreditLabel?: string;
@@ -99,6 +100,29 @@ export const projects: Project[] = [
     tags: ["ניימינג", "לוקסוס", "F&B", "שוקולד"],
     featured: false,
     color: "#c9a97a",
+  },
+  {
+    slug: "deesse",
+    title: "Déesse",
+    subtitle: "ניימינג | טאגליין",
+    category: "ניימינג | טאגליין",
+    year: "2024",
+    description: "נשי, עוצמתי וארטיזנלי - אלה שלושת הערכים שהובילו אותי לשם déesse, מותג התכשיטים של המעצבת מורן יהב.\n\nמהשיחות המקדימות עם מורן למדתי כמה היא מחוברת לאסתטיקה ולתרבות הצרפתית, והתת מודע שלי פשוט לקח אותי לשם. אחרי שהגדרנו את ערכי המותג, האסוציאציות שעלו לי היו שהוא חייב לשדר נשיות, אלגנטיות ועוצמה - בו זמנית.\n\nלמרות שאני לא דוברת צרפתית, ערכתי מחקר על איך נשמעות מילים שמתאימות לנרטיב בצרפתית, ולאחר המון משחקי ניסוי וטעיה, גיליתי מילה שהיא מושלמת כמו שהיא - Déesse. המשמעות של déesse בצרפתית זה \"אלה\". הסאונד שלה רך אבל נוכח, הטיפוגרפיה שלה עגולה ועדינה, אבל נשית. והכל פשוט התיישב בול על המותג.",
+    challenge: "",
+    solution: "השם המושלם\n\nאחרי השם המושלם נולד הטאגליין \"Timeless fine jewelry\" שבא לספר שלא מדובר בטרנד, ולמצב את המותג כקלאסיקה שמאפיינת אותו - תכשיטי זהב ויהלומים יוקרתיים שילוו אותך כל החיים.",
+    deliverables: ["שיום", "טאגליין"],
+    videoUrl: "/projects/deesse/deesse-banner-desktop.mp4",
+    mobileVideoUrl: "/projects/deesse/deesse-banner-mobile.mp4",
+    images: [
+      "/projects/deesse/Deesse-01.png",
+      "/projects/deesse/Deesse-02.mp4",
+      "/projects/deesse/Deesse-03.png",
+      "/projects/deesse/Deesse-04.mp4",
+      "/projects/deesse/Deesse-05.png",
+    ],
+    tags: ["ניימינג", "תכשיטים", "לוקסוס", "טאגליין"],
+    featured: false,
+    color: "#c9b08a",
   },
   {
     slug: "myjool",

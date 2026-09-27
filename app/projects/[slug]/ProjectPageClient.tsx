@@ -216,6 +216,169 @@ function ReverieLayout({ project }: { project: Project }) {
   );
 }
 
+/* ── Déesse layout ───────────────────────────────────────────────── */
+function DeesseLayout({ project }: { project: Project }) {
+  const isMobile = useIsMobile();
+  const media = project.images ?? [];
+  const pad = isMobile ? "0 20px" : "0 56px";
+
+  const rows: [string, string | undefined][] = [];
+  for (let i = 0; i < media.length; i += 2) {
+    rows.push([media[i], media[i + 1]]);
+  }
+
+  function MediaItem({ src, alt }: { src: string; alt: string }) {
+    if (src.endsWith(".mp4")) {
+      return (
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          style={{ width: "100%", display: "block", height: "auto" }}
+        >
+          <source src={src} type="video/mp4" />
+        </video>
+      );
+    }
+    return (
+      <img src={src} alt={alt} style={{ width: "100%", display: "block", height: "auto" }} />
+    );
+  }
+
+  return (
+    <div style={{ background: C.cream, color: C.ink, direction: "rtl" }}>
+
+      {/* Hero video */}
+      <div style={{ lineHeight: 0, background: "#1a1a1a" }}>
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          style={{ width: "100%", display: "block" }}
+        >
+          <source src={project.mobileVideoUrl} media="(max-width: 767px)" type="video/mp4" />
+          <source src={project.videoUrl} type="video/mp4" />
+        </video>
+      </div>
+
+      {/* Title block */}
+      <section style={{ padding: isMobile ? "40px 20px 0" : "72px 56px 0", maxWidth: 1280, margin: "0 auto" }}>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          style={{ textAlign: "right" }}
+        >
+          <h1 style={{
+            fontFamily: "var(--font-body-en)",
+            fontStyle: "normal",
+            fontWeight: 300,
+            fontSize: isMobile ? "clamp(40px, 11vw, 60px)" : "clamp(52px, 7vw, 96px)",
+            lineHeight: 1,
+            letterSpacing: "-0.02em",
+            color: C.ink,
+            margin: 0,
+          }}>
+            {project.title}
+          </h1>
+          <p style={{
+            fontFamily: "var(--font-heading)",
+            fontWeight: 400,
+            fontSize: isMobile ? 13 : 15,
+            color: C.violet,
+            marginTop: 8,
+            marginBottom: 0,
+          }}>
+            {project.category}
+          </p>
+        </motion.div>
+      </section>
+
+      {/* Body text */}
+      <section style={{ padding: isMobile ? "32px 20px 48px" : "48px 56px 64px", maxWidth: 1280, margin: "0 auto" }}>
+        <ScrollReveal>
+          <div style={{
+            borderTop: `1px solid ${C.line}`,
+            paddingTop: isMobile ? 32 : 48,
+            maxWidth: 680,
+            marginRight: 0,
+            marginLeft: "auto",
+            textAlign: "right",
+          }}>
+            {project.description.split("\n\n").map((para, i) => (
+              <p key={i} style={{
+                fontFamily: "var(--font-heading)",
+                fontWeight: 400,
+                fontSize: isMobile ? 15 : 17,
+                lineHeight: 1.8,
+                color: C.ink2,
+                margin: "0 0 16px",
+              }}>
+                {para}
+              </p>
+            ))}
+
+            <div style={{ marginBottom: isMobile ? 20 : 32 }} />
+
+            {project.solution.split("\n\n").map((para, i) =>
+              i === 0 ? (
+                <h2 key={i} style={{
+                  fontFamily: "var(--font-heading)",
+                  fontWeight: 700,
+                  fontSize: isMobile ? 18 : "clamp(20px, 2.2vw, 26px)",
+                  lineHeight: 1.3,
+                  letterSpacing: "-0.018em",
+                  color: C.ink,
+                  margin: "0 0 16px",
+                }}>
+                  {para}
+                </h2>
+              ) : (
+                <p key={i} style={{
+                  fontFamily: "var(--font-heading)",
+                  fontWeight: 400,
+                  fontSize: isMobile ? 15 : 17,
+                  lineHeight: 1.8,
+                  color: C.ink2,
+                  margin: "0 0 16px",
+                }}>
+                  {para}
+                </p>
+              )
+            )}
+          </div>
+        </ScrollReveal>
+      </section>
+
+      {/* Media gallery — 1 col mobile, 2 cols desktop */}
+      <section style={{ padding: isMobile ? "0 0 64px" : "0 56px 96px", maxWidth: isMobile ? "100%" : 1280, margin: "0 auto" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? 6 : 12 }}>
+          {isMobile ? (
+            media.map((src, i) => (
+              <ScrollReveal key={i}>
+                <MediaItem src={src} alt={`${project.title} ${i + 1}`} />
+              </ScrollReveal>
+            ))
+          ) : (
+            rows.map(([left, right], i) => (
+              <ScrollReveal key={i}>
+                <div style={{ display: "grid", gridTemplateColumns: right ? "1fr 1fr" : "1fr", gap: 12 }}>
+                  <MediaItem src={left} alt={`${project.title} ${i * 2 + 1}`} />
+                  {right && <MediaItem src={right} alt={`${project.title} ${i * 2 + 2}`} />}
+                </div>
+              </ScrollReveal>
+            ))
+          )}
+        </div>
+      </section>
+
+      <ProjectFooter project={project} />
+    </div>
+  );
+}
+
 /* ── Generic fallback layout (all other projects) ───────────────── */
 function GenericLayout({ project }: { project: Project }) {
   return (
@@ -294,5 +457,6 @@ function GenericLayout({ project }: { project: Project }) {
 /* ── Router ──────────────────────────────────────────────────────── */
 export default function ProjectPageClient({ project }: Props) {
   if (project.slug === "reverie") return <ReverieLayout project={project} />;
+  if (project.slug === "deesse")  return <DeesseLayout  project={project} />;
   return <GenericLayout project={project} />;
 }
