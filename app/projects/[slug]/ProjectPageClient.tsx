@@ -444,6 +444,148 @@ function DeesseLayout({ project }: { project: Project }) {
   );
 }
 
+/* ── Urban Wise layout ───────────────────────────────────────────── */
+function UrbanWiseLayout({ project }: { project: Project }) {
+  const isMobile = useIsMobile();
+  const heroRef = useRef<HTMLVideoElement>(null);
+  const [heroPlaying, setHeroPlaying] = useState(true);
+
+  const hPad = isMobile ? 20 : 108;
+  const gap  = 24;
+  const images = project.images ?? [];
+
+  return (
+    <div style={{ background: C.cream, color: C.ink, direction: "rtl" }}>
+
+      {/* ── Hero strip ── */}
+      <div
+        style={{
+          position: "relative",
+          marginTop: isMobile ? 47 : 53,
+          height: isMobile ? "max(120px, 8.5vw)" : "8.5vw",
+          overflow: "hidden",
+          background: "#111",
+          cursor: "pointer",
+        }}
+        onClick={() => {
+          const v = heroRef.current;
+          if (!v) return;
+          if (v.paused) { v.play(); setHeroPlaying(true); }
+          else { v.pause(); setHeroPlaying(false); }
+        }}
+      >
+        <video
+          ref={heroRef}
+          autoPlay muted loop playsInline
+          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }}
+        >
+          <source src={project.mobileVideoUrl} media="(max-width: 767px)" type="video/mp4" />
+          <source src={project.videoUrl} type="video/mp4" />
+        </video>
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+          <div style={{ width: 48, height: 48, borderRadius: "50%", background: "rgba(255,255,255,0.88)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {heroPlaying
+              ? <svg width="14" height="14" viewBox="0 0 24 24" fill="#111"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+              : <svg width="14" height="14" viewBox="0 0 24 24" fill="#111" style={{ marginRight: -3 }}><polygon points="5,3 19,12 5,21"/></svg>
+            }
+          </div>
+        </div>
+      </div>
+
+      {/* ── Title block ── */}
+      <section style={{ padding: isMobile ? `56px ${hPad}px` : `100px ${hPad}px` }}>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          style={{ textAlign: "right" }}
+        >
+          <h1 style={{
+            fontFamily: "var(--font-body-en)",
+            fontWeight: 300,
+            fontSize: isMobile ? "clamp(40px,11vw,60px)" : 72,
+            lineHeight: 1,
+            letterSpacing: "-0.02em",
+            color: C.ink,
+            margin: "0 0 12px",
+          }}>
+            {project.title}
+          </h1>
+          <p style={{
+            fontFamily: "var(--font-heading)",
+            fontWeight: 400,
+            fontSize: isMobile ? 13 : 15,
+            color: C.ink3,
+            margin: 0,
+          }}>
+            {project.category}
+          </p>
+        </motion.div>
+      </section>
+
+      {/* ── Text block ── */}
+      <section style={{ padding: isMobile ? `0 ${hPad}px 64px` : `0 ${hPad}px 80px` }}>
+        <div style={{ textAlign: "right", maxWidth: 1130 }}>
+          <h2 style={{
+            fontFamily: "var(--font-heading)",
+            fontWeight: 700,
+            fontSize: isMobile ? 18 : "clamp(18px,1.4vw,22px)",
+            lineHeight: 1.3,
+            letterSpacing: "-0.015em",
+            color: C.ink,
+            margin: "0 0 20px",
+          }}>
+            אמנות הנדסת המותג: משירות הנדסי למותג עם אפיל
+          </h2>
+          {project.description.split("\n\n").map((para, i) => (
+            <p key={i} style={{
+              fontFamily: "var(--font-heading)",
+              fontWeight: 400,
+              fontSize: isMobile ? 15 : 16,
+              lineHeight: 1.85,
+              color: C.ink2,
+              margin: "0 0 14px",
+            }}>{para}</p>
+          ))}
+          <div style={{ marginTop: 28 }}>
+            <p style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 14, color: C.ink, margin: "0 0 6px" }}>
+              מיתוג ועיצוב
+            </p>
+            <a
+              href="#"
+              style={{ fontFamily: "var(--font-body-en)", fontWeight: 300, fontSize: 15, color: C.ink, textDecoration: "underline", textUnderlineOffset: 3, letterSpacing: "0.02em", transition: "color 0.2s" }}
+              onMouseEnter={e => ((e.target as HTMLElement).style.color = C.violet)}
+              onMouseLeave={e => ((e.target as HTMLElement).style.color = C.ink)}
+            >
+              Hadar Mizrahi
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Gallery — 2×2 equal grid ── */}
+      <section style={{ padding: isMobile ? `0 0 64px` : `0 ${hPad}px 96px` }}>
+        <div style={{ display: "flex", flexDirection: "column", gap }}>
+          {isMobile ? (
+            images.map((src, i) => (
+              <img key={i} src={src} alt={`Urban Wise ${i + 1}`} style={{ width: "100%", display: "block", height: "auto" }} />
+            ))
+          ) : (
+            [[images[0], images[1]], [images[2], images[3]]].map(([a, b], i) => (
+              <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap }}>
+                <img src={a} alt={`Urban Wise ${i * 2 + 1}`} style={{ width: "100%", display: "block", height: "auto" }} />
+                <img src={b} alt={`Urban Wise ${i * 2 + 2}`} style={{ width: "100%", display: "block", height: "auto" }} />
+              </div>
+            ))
+          )}
+        </div>
+      </section>
+
+      <ProjectFooter project={project} />
+    </div>
+  );
+}
+
 /* ── Generic fallback layout (all other projects) ───────────────── */
 function GenericLayout({ project }: { project: Project }) {
   return (
@@ -522,6 +664,7 @@ function GenericLayout({ project }: { project: Project }) {
 /* ── Router ──────────────────────────────────────────────────────── */
 export default function ProjectPageClient({ project }: Props) {
   if (project.slug === "reverie") return <ReverieLayout project={project} />;
-  if (project.slug === "deesse")  return <DeesseLayout  project={project} />;
+  if (project.slug === "deesse")      return <DeesseLayout     project={project} />;
+  if (project.slug === "urban-wise") return <UrbanWiseLayout  project={project} />;
   return <GenericLayout project={project} />;
 }
