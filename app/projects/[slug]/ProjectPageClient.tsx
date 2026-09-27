@@ -280,9 +280,16 @@ function DeesseLayout({ project }: { project: Project }) {
   return (
     <div style={{ background: C.cream, color: C.ink, direction: "rtl" }}>
 
-      {/* ── Hero strip — 160px, edge-to-edge, object-fit cover ── */}
+      {/* ── Hero strip — below fixed nav, 70vh desktop / 50vh mobile ── */}
       <div
-        style={{ position: "relative", height: isMobile ? 120 : 160, overflow: "hidden", background: "#111", cursor: "pointer" }}
+        style={{
+          position: "relative",
+          marginTop: isMobile ? 47 : 53,
+          height: isMobile ? "50vh" : "70vh",
+          overflow: "hidden",
+          background: "#111",
+          cursor: "pointer",
+        }}
         onClick={() => {
           const v = heroRef.current;
           if (!v) return;
@@ -293,7 +300,7 @@ function DeesseLayout({ project }: { project: Project }) {
         <video
           ref={heroRef}
           autoPlay muted loop playsInline
-          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }}
         >
           <source src={project.mobileVideoUrl} media="(max-width: 767px)" type="video/mp4" />
           <source src={project.videoUrl} type="video/mp4" />
