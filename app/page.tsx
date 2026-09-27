@@ -200,7 +200,7 @@ const Acc = ({ children }: { children: React.ReactNode }) => (
 /* ─── bento data ─────────────────────────────────────────────────────── */
 const tiles: Tile[] = [
   {
-    id: "shapira", href: "/projects/shapira-beer", size: "lg",
+    id: "shapira", href: "/projects/bira-shapira", size: "lg",
     visual: "v-lav", logoStyle: "he", logo: "שפירא",
     h3: <>מותר לכתוב, אסור לשתות — <Acc>איך פגשתי את שפירא.</Acc></>,
     tag: "אפיון אתר + קופי · 2024",
@@ -250,7 +250,7 @@ const tiles: Tile[] = [
     tag: "קופי לדפי נחיתה",
   },
   {
-    id: "kfir", href: "/projects/shapira-beer",
+    id: "kfir", href: "/projects/bira-shapira",
     visual: "v-cream-2", logoStyle: "he", logo: "כפיר",
     h3: <>מעסק B2B לעסק שמדבר <Acc>בשפה של הלקוח.</Acc></>,
     tag: "שפה + קופי לאתר",
@@ -280,7 +280,7 @@ const tiles: Tile[] = [
     tag: "שפה + אפיון + קופי לאתר",
   },
   {
-    id: "grano", href: "/projects/shapira-beer",
+    id: "grano", href: "/projects/bira-shapira",
     visual: "v-acid", logoStyle: "en", logo: "Grano",
     h3: <>שם שמרגיש <Acc>כאילו היה תמיד שם.</Acc></>,
     tag: "ניימינג + טאגליין · 2025",
