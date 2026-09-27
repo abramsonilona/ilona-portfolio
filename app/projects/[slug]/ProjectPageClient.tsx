@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -216,37 +217,100 @@ function ReverieLayout({ project }: { project: Project }) {
   );
 }
 
+/* ── Gallery video item for Déesse (needs hooks → must be top-level) ── */
+function DeesseGalleryVideo({ src }: { src: string }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(true);
+
+  const toggle = () => {
+    const v = ref.current;
+    if (!v) return;
+    if (v.paused) { v.play(); setPlaying(true); }
+    else { v.pause(); setPlaying(false); }
+  };
+
+  return (
+    <div onClick={toggle} style={{ position: "relative", overflow: "hidden", cursor: "pointer", height: "100%" }}>
+      <video
+        ref={ref}
+        autoPlay muted loop playsInline
+        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+      >
+        <source src={src} type="video/mp4" />
+      </video>
+
+      {/* Mute icon — top-left corner */}
+      <div style={{ position: "absolute", top: 12, left: 12, pointerEvents: "none" }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+          <line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>
+        </svg>
+      </div>
+
+      {/* Play / pause button — center */}
+      <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+        <div style={{ width: 48, height: 48, borderRadius: "50%", background: "rgba(255,255,255,0.88)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          {playing ? (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="#111"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+          ) : (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="#111" style={{ marginRight: -3 }}><polygon points="5,3 19,12 5,21"/></svg>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Déesse layout ───────────────────────────────────────────────── */
 function DeesseLayout({ project }: { project: Project }) {
   const isMobile = useIsMobile();
-  const [m0, m1, m2, m3, m4] = project.images ?? [];
-  const GAP = isMobile ? 4 : 6;
+  const heroRef = useRef<HTMLVideoElement>(null);
+  const [heroPlaying, setHeroPlaying] = useState(true);
 
-  function MediaItem({ src, alt, style }: { src: string; alt: string; style?: React.CSSProperties }) {
-    const base: React.CSSProperties = { width: "100%", display: "block", height: "auto", ...style };
-    if (src?.endsWith(".mp4")) {
-      return (
-        <video autoPlay muted loop playsInline style={base}>
-          <source src={src} type="video/mp4" />
-        </video>
-      );
-    }
-    return <img src={src} alt={alt} style={base} />;
-  }
+  const hPad = isMobile ? 20 : 108;
+  const gap  = 24;
+
+  // Hardcoded media paths — layout is non-uniform (can't use generic array loop)
+  const img1 = "/projects/deesse/Deesse-01.png"; // necklace    — row1 RIGHT wide (62%)
+  const vid2 = "/projects/deesse/Deesse-02.mp4"; // hands craft — row1 LEFT  narrow (38%)
+  const img3 = "/projects/deesse/Deesse-03.png"; // ribbon ring — row2 full width
+  const vid4 = "/projects/deesse/Deesse-04.mp4"; // boxes       — row3 RIGHT narrow (38%)
+  const img5 = "/projects/deesse/Deesse-05.png"; // pattern ring — row3 LEFT wide (62%)
 
   return (
     <div style={{ background: C.cream, color: C.ink, direction: "rtl" }}>
 
-      {/* Hero video */}
-      <div style={{ lineHeight: 0, background: "#1a1a1a" }}>
-        <video autoPlay muted loop playsInline style={{ width: "100%", display: "block" }}>
+      {/* ── Hero strip — 160px, edge-to-edge, object-fit cover ── */}
+      <div
+        style={{ position: "relative", height: isMobile ? 120 : 160, overflow: "hidden", background: "#111", cursor: "pointer" }}
+        onClick={() => {
+          const v = heroRef.current;
+          if (!v) return;
+          if (v.paused) { v.play(); setHeroPlaying(true); }
+          else { v.pause(); setHeroPlaying(false); }
+        }}
+      >
+        <video
+          ref={heroRef}
+          autoPlay muted loop playsInline
+          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+        >
           <source src={project.mobileVideoUrl} media="(max-width: 767px)" type="video/mp4" />
           <source src={project.videoUrl} type="video/mp4" />
         </video>
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+          <div style={{ width: 48, height: 48, borderRadius: "50%", background: "rgba(255,255,255,0.88)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {heroPlaying ? (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#111"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            ) : (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#111" style={{ marginRight: -3 }}><polygon points="5,3 19,12 5,21"/></svg>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Title block */}
-      <section style={{ padding: isMobile ? "40px 20px 0" : "72px 56px 0", maxWidth: 1280, margin: "0 auto" }}>
+      {/* ── Title block ── */}
+      <section style={{ padding: isMobile ? `56px ${hPad}px` : `100px ${hPad}px` }}>
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -256,11 +320,11 @@ function DeesseLayout({ project }: { project: Project }) {
           <h1 style={{
             fontFamily: "var(--font-body-en)",
             fontWeight: 300,
-            fontSize: isMobile ? "clamp(40px,11vw,60px)" : "clamp(52px,7vw,96px)",
+            fontSize: isMobile ? "clamp(40px,11vw,60px)" : 72,
             lineHeight: 1,
             letterSpacing: "-0.02em",
             color: C.ink,
-            margin: 0,
+            margin: "0 0 12px",
           }}>
             {project.title}
           </h1>
@@ -268,138 +332,104 @@ function DeesseLayout({ project }: { project: Project }) {
             fontFamily: "var(--font-heading)",
             fontWeight: 400,
             fontSize: isMobile ? 13 : 15,
-            color: C.violet,
-            marginTop: 8,
-            marginBottom: 0,
+            color: C.ink3,
+            margin: 0,
           }}>
             {project.category}
           </p>
         </motion.div>
       </section>
 
-      {/* Body text */}
-      <section style={{ padding: isMobile ? "32px 20px 48px" : "48px 56px 64px", maxWidth: 1280, margin: "0 auto" }}>
-        <ScrollReveal>
-          <div style={{
-            borderTop: `1px solid ${C.line}`,
-            paddingTop: isMobile ? 32 : 48,
-            maxWidth: 680,
-            marginRight: 0,
-            marginLeft: "auto",
-            textAlign: "right",
+      {/* ── Text block ── */}
+      <section style={{ padding: isMobile ? `0 ${hPad}px 64px` : `0 ${hPad}px 80px` }}>
+        <div style={{ textAlign: "right", maxWidth: 1130 }}>
+          <h2 style={{
+            fontFamily: "var(--font-heading)",
+            fontWeight: 700,
+            fontSize: isMobile ? 18 : "clamp(18px,1.4vw,22px)",
+            lineHeight: 1.3,
+            letterSpacing: "-0.015em",
+            color: C.ink,
+            margin: "0 0 20px",
           }}>
-            {project.description.split("\n\n").map((para, i) => (
-              <p key={i} style={{
-                fontFamily: "var(--font-heading)",
-                fontWeight: 400,
-                fontSize: isMobile ? 15 : 17,
-                lineHeight: 1.8,
-                color: C.ink2,
-                margin: "0 0 16px",
-              }}>
-                {para}
-              </p>
-            ))}
+            השם שברא את עצמו
+          </h2>
 
-            <div style={{ marginBottom: isMobile ? 20 : 32 }} />
+          {project.description.split("\n\n").map((para, i) => (
+            <p key={`d${i}`} style={{
+              fontFamily: "var(--font-heading)",
+              fontWeight: 400,
+              fontSize: isMobile ? 15 : 16,
+              lineHeight: 1.85,
+              color: C.ink2,
+              margin: "0 0 14px",
+            }}>{para}</p>
+          ))}
 
-            {project.solution.split("\n\n").map((para, i) =>
-              i === 0 ? (
-                <h2 key={i} style={{
-                  fontFamily: "var(--font-heading)",
-                  fontWeight: 700,
-                  fontSize: isMobile ? 18 : "clamp(20px,2.2vw,26px)",
-                  lineHeight: 1.3,
-                  letterSpacing: "-0.018em",
-                  color: C.ink,
-                  margin: "0 0 16px",
-                }}>
-                  {para}
-                </h2>
-              ) : (
-                <p key={i} style={{
-                  fontFamily: "var(--font-heading)",
-                  fontWeight: 400,
-                  fontSize: isMobile ? 15 : 17,
-                  lineHeight: 1.8,
-                  color: C.ink2,
-                  margin: "0 0 16px",
-                }}>
-                  {para}
-                </p>
-              )
-            )}
+          {/* solution — skip first chunk (heading already hardcoded above) */}
+          {project.solution.split("\n\n").slice(1).map((para, i) => (
+            <p key={`s${i}`} style={{
+              fontFamily: "var(--font-heading)",
+              fontWeight: 400,
+              fontSize: isMobile ? 15 : 16,
+              lineHeight: 1.85,
+              color: C.ink2,
+              margin: "0 0 14px",
+            }}>{para}</p>
+          ))}
 
-            {project.designerCredit && (
-              <div style={{ borderTop: `1px solid ${C.line}`, paddingTop: 24, marginTop: 12 }}>
-                <p style={{
-                  fontFamily: "var(--font-heading)",
-                  fontWeight: 400,
-                  fontSize: 13,
-                  color: C.ink3,
-                  margin: "0 0 6px",
-                }}>
-                  {project.designerCreditLabel ?? "מיתוג ועיצוב"}
-                </p>
-                <a
-                  href="#"
-                  style={{
-                    fontFamily: "var(--font-body-en)",
-                    fontWeight: 300,
-                    fontSize: 15,
-                    color: C.ink,
-                    textDecoration: "underline",
-                    textUnderlineOffset: 3,
-                    letterSpacing: "0.02em",
-                    transition: "color 0.2s",
-                  }}
-                  onMouseEnter={e => ((e.target as HTMLElement).style.color = C.violet)}
-                  onMouseLeave={e => ((e.target as HTMLElement).style.color = C.ink)}
-                >
-                  {project.designerCredit}
-                </a>
-              </div>
-            )}
+          <div style={{ marginTop: 28 }}>
+            <p style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 14, color: C.ink, margin: "0 0 6px" }}>
+              מיתוג ועיצוב
+            </p>
+            <a
+              href="#"
+              style={{ fontFamily: "var(--font-body-en)", fontWeight: 300, fontSize: 15, color: C.ink, textDecoration: "underline", textUnderlineOffset: 3, letterSpacing: "0.02em", transition: "color 0.2s" }}
+              onMouseEnter={e => ((e.target as HTMLElement).style.color = C.violet)}
+              onMouseLeave={e => ((e.target as HTMLElement).style.color = C.ink)}
+            >
+              Hadar Mizrahi
+            </a>
           </div>
-        </ScrollReveal>
+        </div>
       </section>
 
-      {/* Gallery
-          Mobile : single column, all items stacked
-          Desktop: row1 = [m0 | m1], row2 = [m2 full], row3 = [m3 | m4]  */}
-      <section style={{ paddingBottom: isMobile ? 64 : 96 }}>
-        {isMobile ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: GAP }}>
-            {[m0, m1, m2, m3, m4].filter(Boolean).map((src, i) => (
-              <ScrollReveal key={i}>
-                <MediaItem src={src} alt={`${project.title} ${i + 1}`} />
-              </ScrollReveal>
-            ))}
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: GAP }}>
-            {/* Row 1 — two columns */}
-            <ScrollReveal>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: GAP }}>
-                <MediaItem src={m0} alt={`${project.title} 1`} />
-                <MediaItem src={m1} alt={`${project.title} 2`} />
-              </div>
-            </ScrollReveal>
+      {/* ── Gallery ── */}
+      <section style={{ padding: isMobile ? `0 0 64px` : `0 ${hPad}px 96px` }}>
+        <div style={{ display: "flex", flexDirection: "column", gap }}>
 
-            {/* Row 2 — full width */}
-            <ScrollReveal>
-              <MediaItem src={m2} alt={`${project.title} 3`} />
-            </ScrollReveal>
+          {/* Row 1: RIGHT=img1 (wide 62%) | LEFT=vid2 (narrow 38%)
+              RTL grid: first DOM child → right column */}
+          {isMobile ? (
+            <div style={{ display: "flex", flexDirection: "column", gap }}>
+              <img src={img1} alt="Déesse necklace" style={{ width: "100%", display: "block", height: "auto" }} />
+              <DeesseGalleryVideo src={vid2} />
+            </div>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "62fr 38fr", gap, alignItems: "stretch" }}>
+              <img src={img1} alt="Déesse necklace" style={{ width: "100%", display: "block", height: "auto" }} />
+              <DeesseGalleryVideo src={vid2} />
+            </div>
+          )}
 
-            {/* Row 3 — two columns */}
-            <ScrollReveal>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: GAP }}>
-                <MediaItem src={m3} alt={`${project.title} 4`} />
-                <MediaItem src={m4} alt={`${project.title} 5`} />
-              </div>
-            </ScrollReveal>
-          </div>
-        )}
+          {/* Row 2: full-width image */}
+          <img src={img3} alt="Déesse ring with ribbon" style={{ width: "100%", display: "block", height: "auto" }} />
+
+          {/* Row 3: RIGHT=vid4 (narrow 38%) | LEFT=img5 (wide 62%)
+              RTL grid: first DOM child → right column */}
+          {isMobile ? (
+            <div style={{ display: "flex", flexDirection: "column", gap }}>
+              <img src={img5} alt="Déesse ring on pattern" style={{ width: "100%", display: "block", height: "auto" }} />
+              <DeesseGalleryVideo src={vid4} />
+            </div>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "38fr 62fr", gap, alignItems: "stretch" }}>
+              <DeesseGalleryVideo src={vid4} />
+              <img src={img5} alt="Déesse ring on pattern" style={{ width: "100%", display: "block", height: "auto" }} />
+            </div>
+          )}
+
+        </div>
       </section>
 
       <ProjectFooter project={project} />
