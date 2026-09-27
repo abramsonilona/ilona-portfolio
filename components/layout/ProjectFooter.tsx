@@ -148,20 +148,6 @@ export default function ProjectFooter({ project }: Props) {
           }}>
             © All rights reserved to Ilona Abramson
           </p>
-          {designerCredit && (
-            <p style={{
-              fontFamily: "var(--font-body-en)", fontWeight: 300, fontSize: 11,
-              color: C.ink3, letterSpacing: "0.03em", margin: 0,
-            }}>
-              Design by{" "}
-              <a href="#"
-                style={{ color: C.ink3, textDecoration: "underline", textUnderlineOffset: 2, transition: "color 0.2s" }}
-                onMouseEnter={e => ((e.target as HTMLElement).style.color = C.ink)}
-                onMouseLeave={e => ((e.target as HTMLElement).style.color = C.ink3)}>
-                {designerCredit}
-              </a>
-            </p>
-          )}
         </div>
 
       </div>
