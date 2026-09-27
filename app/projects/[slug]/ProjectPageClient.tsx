@@ -285,7 +285,7 @@ function DeesseLayout({ project }: { project: Project }) {
         style={{
           position: "relative",
           marginTop: isMobile ? 47 : 53,
-          height: isMobile ? "50vh" : "70vh",
+          height: isMobile ? "max(120px, 8.5vw)" : "8.5vw",
           overflow: "hidden",
           background: "#111",
           cursor: "pointer",
