@@ -219,31 +219,19 @@ function ReverieLayout({ project }: { project: Project }) {
 /* ── Déesse layout ───────────────────────────────────────────────── */
 function DeesseLayout({ project }: { project: Project }) {
   const isMobile = useIsMobile();
-  const media = project.images ?? [];
-  const pad = isMobile ? "0 20px" : "0 56px";
+  const [m0, m1, m2, m3, m4] = project.images ?? [];
+  const GAP = isMobile ? 4 : 6;
 
-  const rows: [string, string | undefined][] = [];
-  for (let i = 0; i < media.length; i += 2) {
-    rows.push([media[i], media[i + 1]]);
-  }
-
-  function MediaItem({ src, alt }: { src: string; alt: string }) {
-    if (src.endsWith(".mp4")) {
+  function MediaItem({ src, alt, style }: { src: string; alt: string; style?: React.CSSProperties }) {
+    const base: React.CSSProperties = { width: "100%", display: "block", height: "auto", ...style };
+    if (src?.endsWith(".mp4")) {
       return (
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          style={{ width: "100%", display: "block", height: "auto" }}
-        >
+        <video autoPlay muted loop playsInline style={base}>
           <source src={src} type="video/mp4" />
         </video>
       );
     }
-    return (
-      <img src={src} alt={alt} style={{ width: "100%", display: "block", height: "auto" }} />
-    );
+    return <img src={src} alt={alt} style={base} />;
   }
 
   return (
@@ -251,13 +239,7 @@ function DeesseLayout({ project }: { project: Project }) {
 
       {/* Hero video */}
       <div style={{ lineHeight: 0, background: "#1a1a1a" }}>
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          style={{ width: "100%", display: "block" }}
-        >
+        <video autoPlay muted loop playsInline style={{ width: "100%", display: "block" }}>
           <source src={project.mobileVideoUrl} media="(max-width: 767px)" type="video/mp4" />
           <source src={project.videoUrl} type="video/mp4" />
         </video>
@@ -273,9 +255,8 @@ function DeesseLayout({ project }: { project: Project }) {
         >
           <h1 style={{
             fontFamily: "var(--font-body-en)",
-            fontStyle: "normal",
             fontWeight: 300,
-            fontSize: isMobile ? "clamp(40px, 11vw, 60px)" : "clamp(52px, 7vw, 96px)",
+            fontSize: isMobile ? "clamp(40px,11vw,60px)" : "clamp(52px,7vw,96px)",
             lineHeight: 1,
             letterSpacing: "-0.02em",
             color: C.ink,
@@ -327,7 +308,7 @@ function DeesseLayout({ project }: { project: Project }) {
                 <h2 key={i} style={{
                   fontFamily: "var(--font-heading)",
                   fontWeight: 700,
-                  fontSize: isMobile ? 18 : "clamp(20px, 2.2vw, 26px)",
+                  fontSize: isMobile ? 18 : "clamp(20px,2.2vw,26px)",
                   lineHeight: 1.3,
                   letterSpacing: "-0.018em",
                   color: C.ink,
@@ -348,30 +329,77 @@ function DeesseLayout({ project }: { project: Project }) {
                 </p>
               )
             )}
+
+            {project.designerCredit && (
+              <div style={{ borderTop: `1px solid ${C.line}`, paddingTop: 24, marginTop: 12 }}>
+                <p style={{
+                  fontFamily: "var(--font-heading)",
+                  fontWeight: 400,
+                  fontSize: 13,
+                  color: C.ink3,
+                  margin: "0 0 6px",
+                }}>
+                  {project.designerCreditLabel ?? "מיתוג ועיצוב"}
+                </p>
+                <a
+                  href="#"
+                  style={{
+                    fontFamily: "var(--font-body-en)",
+                    fontWeight: 300,
+                    fontSize: 15,
+                    color: C.ink,
+                    textDecoration: "underline",
+                    textUnderlineOffset: 3,
+                    letterSpacing: "0.02em",
+                    transition: "color 0.2s",
+                  }}
+                  onMouseEnter={e => ((e.target as HTMLElement).style.color = C.violet)}
+                  onMouseLeave={e => ((e.target as HTMLElement).style.color = C.ink)}
+                >
+                  {project.designerCredit}
+                </a>
+              </div>
+            )}
           </div>
         </ScrollReveal>
       </section>
 
-      {/* Media gallery — 1 col mobile, 2 cols desktop */}
-      <section style={{ padding: isMobile ? "0 0 64px" : "0 56px 96px", maxWidth: isMobile ? "100%" : 1280, margin: "0 auto" }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? 6 : 12 }}>
-          {isMobile ? (
-            media.map((src, i) => (
+      {/* Gallery
+          Mobile : single column, all items stacked
+          Desktop: row1 = [m0 | m1], row2 = [m2 full], row3 = [m3 | m4]  */}
+      <section style={{ paddingBottom: isMobile ? 64 : 96 }}>
+        {isMobile ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: GAP }}>
+            {[m0, m1, m2, m3, m4].filter(Boolean).map((src, i) => (
               <ScrollReveal key={i}>
                 <MediaItem src={src} alt={`${project.title} ${i + 1}`} />
               </ScrollReveal>
-            ))
-          ) : (
-            rows.map(([left, right], i) => (
-              <ScrollReveal key={i}>
-                <div style={{ display: "grid", gridTemplateColumns: right ? "1fr 1fr" : "1fr", gap: 12 }}>
-                  <MediaItem src={left} alt={`${project.title} ${i * 2 + 1}`} />
-                  {right && <MediaItem src={right} alt={`${project.title} ${i * 2 + 2}`} />}
-                </div>
-              </ScrollReveal>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: GAP }}>
+            {/* Row 1 — two columns */}
+            <ScrollReveal>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: GAP }}>
+                <MediaItem src={m0} alt={`${project.title} 1`} />
+                <MediaItem src={m1} alt={`${project.title} 2`} />
+              </div>
+            </ScrollReveal>
+
+            {/* Row 2 — full width */}
+            <ScrollReveal>
+              <MediaItem src={m2} alt={`${project.title} 3`} />
+            </ScrollReveal>
+
+            {/* Row 3 — two columns */}
+            <ScrollReveal>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: GAP }}>
+                <MediaItem src={m3} alt={`${project.title} 4`} />
+                <MediaItem src={m4} alt={`${project.title} 5`} />
+              </div>
+            </ScrollReveal>
+          </div>
+        )}
       </section>
 
       <ProjectFooter project={project} />
