@@ -710,9 +710,6 @@ function ShapiraBeerLayout({ project }: { project: Project }) {
     `${B}/Bira-Shapira-05.png`,
     `${B}/Bira-Shapira-07.png`,
     `${B}/Bira-Shapira-08.png`,
-  ];
-
-  const popups = [
     `${B}/Bira-Shapira-09.png`,
     `${B}/Bira-Shapira-10.png`,
   ];
@@ -801,6 +798,16 @@ function ShapiraBeerLayout({ project }: { project: Project }) {
       {/* ── Text block ── */}
       <section style={{ padding: isMobile ? `40px ${hPad}px 64px` : `56px ${hPad}px 80px` }}>
         <div style={{ textAlign: "right", maxWidth: 1130 }}>
+          <h2 style={{
+            fontFamily: "var(--font-heading)",
+            fontWeight: 700,
+            fontSize: isMobile ? 18 : "clamp(18px,1.4vw,22px)",
+            lineHeight: 1.3,
+            color: C.ink,
+            margin: "0 0 20px",
+          }}>
+            {solParas[0]}
+          </h2>
           {descParas.map((para, i) => (
             <p key={i} style={{
               fontFamily: "var(--font-heading)",
@@ -811,16 +818,6 @@ function ShapiraBeerLayout({ project }: { project: Project }) {
               margin: "0 0 14px",
             }}>{para}</p>
           ))}
-          <h2 style={{
-            fontFamily: "var(--font-heading)",
-            fontWeight: 700,
-            fontSize: isMobile ? 18 : "clamp(18px,1.4vw,22px)",
-            lineHeight: 1.3,
-            color: C.ink,
-            margin: "32px 0 16px",
-          }}>
-            {solParas[0]}
-          </h2>
           {solParas.slice(1).map((para, i) => (
             <p key={i} style={{
               fontFamily: "var(--font-heading)",
@@ -901,20 +898,11 @@ function ShapiraBeerLayout({ project }: { project: Project }) {
         </div>
       </section>
 
-      {/* ── Screenshots 2×2 grid ── */}
-      <section style={{ padding: isMobile ? `48px 0` : `80px ${hPad}px` }}>
-        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap }}>
+      {/* ── Screenshots 2×3 grid — edge to edge ── */}
+      <section style={{ padding: 0 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 0 }}>
           {screenshots.map((src, i) => (
             <img key={i} src={src} alt={`Shapira website ${i + 1}`} style={{ width: "100%", display: "block", height: "auto" }} />
-          ))}
-        </div>
-      </section>
-
-      {/* ── Popups row ── */}
-      <section style={{ padding: isMobile ? `0 ${hPad}px 48px` : `0 ${hPad}px 80px` }}>
-        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap }}>
-          {popups.map((src, i) => (
-            <img key={i} src={src} alt={`Shapira popup ${i + 1}`} style={{ width: "100%", display: "block", height: "auto" }} />
           ))}
         </div>
       </section>
