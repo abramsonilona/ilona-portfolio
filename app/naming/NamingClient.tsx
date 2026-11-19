@@ -17,6 +17,7 @@ const C = {
   caseRule: "#cfc7bd", // between cases
   media:  "#efe8e1",
   violet: "#a173ea",
+  violetText: "#6b3fb8", // violet that passes 4.5:1 on cream, for small type
 };
 
 const HE = "var(--font-heading)";
@@ -177,6 +178,8 @@ function LabeledCell({ label, item, isMobile }: { label: string; item: Media; is
 }
 
 // ─── Text helpers ──────────────────────────────────────────────────
+interface StorySection { title: string; paragraphs: string[] }
+
 // Split a text into blocks, each new block starting at one of the phrases.
 function splitAt(text: string, phrases: string[]): string[] {
   const cuts = phrases
@@ -212,17 +215,20 @@ interface CaseProps {
   descriptorLang: "he" | "en";
   category: string;
   heading: string;
-  paragraphs: string[];
+  sections: StorySection[]; // האתגר / הכיוון הקריאייטיבי / השם הנבחר
   credits?: { label: string; name: string; lang?: "he" | "en" }[];
   mobileBreaks: string[]; // mobile: start a new line at each of these phrases
   emphasis?: string[];    // phrases set in bold (taglines)
   lead: Media; // mobile only: one image right under the brand name
-  columns: 2 | 3; // desktop text columns, by text length
   isMobile: boolean;
   children: React.ReactNode; // gallery
 }
 
-function CaseSection({ id, number, title, lang, descriptor, descriptorLang, category, heading, paragraphs, credits, mobileBreaks, emphasis = [], lead, columns, isMobile, children }: CaseProps) {
+function CaseSection({ id, number, title, lang, descriptor, descriptorLang, category, heading, sections, credits, mobileBreaks, emphasis = [], lead, isMobile, children }: CaseProps) {
+  const [expanded, setExpanded] = useState(false);
+  const sectionTitle: React.CSSProperties = {
+    fontFamily: HE, fontWeight: 700, fontSize: 15, lineHeight: 1.4, color: C.violetText, margin: "0 0 10px",
+  };
   const p: React.CSSProperties = {
     fontFamily: HE, fontWeight: 400, fontSize: isMobile ? 15 : 15.5, lineHeight: 1.75,
     color: C.body, margin: "0 0 1em",
@@ -272,15 +278,43 @@ function CaseSection({ id, number, title, lang, descriptor, descriptorLang, cate
         <h4 style={{ fontFamily: HE, fontWeight: 700, fontSize: isMobile ? 17 : 18, lineHeight: 1.4, color: C.ink, margin: "0 0 16px" }}>
           {heading}
         </h4>
-        {/* Desktop: text flows across 2 or 3 columns; mobile: one column */}
         {isMobile ? (
-          // Mobile: the story in a few blocks, breaking only where chosen
-          splitAt(paragraphs.join(" "), mobileBreaks).map((t, i) => (
-            <p key={i} style={{ ...p, margin: i === 0 ? 0 : "0.75em 0 0" }}>{withEmphasis(t, emphasis)}</p>
-          ))
+          // Mobile: first section visible, the rest behind "קראו עוד".
+          // Inside a section the text is one block, breaking only at the chosen phrases.
+          <>
+            {sections.map((sec, si) => (si === 0 || expanded) && (
+              <section key={sec.title} id={si === 1 ? `${id}-more` : undefined} style={{ marginTop: si === 0 ? 0 : 24 }}>
+                <h5 style={sectionTitle}>{sec.title}</h5>
+                {splitAt(sec.paragraphs.join(" "), mobileBreaks).map((t, i) => (
+                  <p key={i} style={{ ...p, margin: i === 0 ? 0 : "0.75em 0 0" }}>{withEmphasis(t, emphasis)}</p>
+                ))}
+              </section>
+            ))}
+            {!expanded && sections.length > 1 && (
+              <button
+                type="button"
+                onClick={() => setExpanded(true)}
+                aria-expanded={false}
+                aria-controls={`${id}-more`}
+                style={{
+                  marginTop: 16, padding: "10px 0", background: "none", border: 0, cursor: "pointer",
+                  fontFamily: HE, fontWeight: 700, fontSize: 15, color: C.ink,
+                  textDecoration: "underline", textUnderlineOffset: 5, textDecorationThickness: 1,
+                }}
+              >
+                קראו עוד
+              </button>
+            )}
+          </>
         ) : (
-          <div style={{ columnCount: columns, columnGap: "clamp(32px, 3.4vw, 56px)", columnFill: "balance" }}>
-            {paragraphs.map((t, i) => <p key={i} style={{ ...p, breakInside: "avoid-column" }}>{withEmphasis(t, emphasis)}</p>)}
+          // Desktop: one column per section, side by side
+          <div style={{ display: "grid", gridTemplateColumns: `repeat(${sections.length}, minmax(0, 1fr))`, columnGap: "clamp(32px, 3.4vw, 56px)", alignItems: "start" }}>
+            {sections.map(sec => (
+              <section key={sec.title}>
+                <h5 style={sectionTitle}>{sec.title}</h5>
+                {sec.paragraphs.map((t, i) => <p key={i} style={p}>{withEmphasis(t, emphasis)}</p>)}
+              </section>
+            ))}
           </div>
         )}
         {credits && credits.length > 0 && (
@@ -348,39 +382,89 @@ const PROCESS_STEPS = [
   },
 ];
 
-const MYJOOL_PARAGRAPHS = [
-  "בשיחה הראשונה שלי עם ״הדקלאים״, קואופרטיב תמרים ישראלי שעושה חיל בעולם, חשבתי לעצמי: למה תמרים צריכים ניימינג?!",
-  "אבל ככל שהשיחה התקדמה, הבנתי שהשאיפה שלהם גדולה הרבה יותר מבחירת שם. הם רצו להיכנס לשוק האירופי עם מותג חדש של תמרי מג'הול מובחרים, ולשנות את האופן שבו אנשים תופסים את הפרי הזה.",
-  "עם כל הכבוד לתמר, הוא לא בדיוק הפרי הכי טרנדי בסופר. בישראל הוא עדיין מזוהה לא מעט עם המזווה של סבתא, ובאירופה הוא בכלל לא היה חלק טבעי מתפריט החטיפים היומיומי.",
-  "האתגר היה להפוך מוצר מסורתי למשהו צעיר, עכשווי ונחשק, כזה שיכול לתפוס מקום על המדף לצד חטיפי הבריאות המוכרים.",
-  "הבנתי שכדי לגרום לקהל חדש להתאהב בתמרים, צריך קודם כול לשנות את הסיפור שלהם. במקום להציג את התמר כעוד פרי יבש, בחרנו להבליט את מה שיש בו: מתיקות טבעית, אנרגיה זמינה ויכולת להשתלב כמעט בכל רגע ביום.",
-  "חיפשתי שם שיצליח לקחת את המג'הול המוכר לעולם חדש, עם אישיות צעירה, בינלאומית ובעיקר כזאת שקל להתחבר אליה.",
-  "משחק מילים קטן שהפך לשינוי גדול בתפיסה. החיבור בין MY ל-Medjool הפך את התמר למשהו אישי, משהו שהוא חלק מהיום שלי, מההרגלים שלי ומהרגעים הקטנים שבהם אני צריכה קצת אנרגיה.",
-  "ה-MY הפך גם לעיקרון שמוביל את השפה החזותית: דמויות מאוירות שמחבקות את התמר, מתאמנות איתו, נשענות עליו ופשוט משלבות אותו בטבעיות ביומיום שלהן.",
-  "את הסיפור השלים הטאגליין Brings out your best, שמחבר בין האנרגיה הטבעית של התמר לבין התחושה שהוא מאפשר לנו להביא לידי ביטוי את הגרסה הטובה ביותר של עצמנו.",
-  "וככה, מהפרי של סבתא נולד מותג צעיר וצבעוני, שהגיע גם למדפי Waitrose בלונדון.",
+const MYJOOL_SECTIONS: StorySection[] = [
+  {
+    title: "האתגר",
+    paragraphs: [
+      "בשיחה הראשונה שלי עם ״הדקלאים״, קואופרטיב תמרים ישראלי שעושה חיל בעולם, חשבתי לעצמי: למה תמרים צריכים ניימינג?!",
+      "אבל ככל שהשיחה התקדמה, הבנתי שהשאיפה שלהם גדולה הרבה יותר מבחירת שם. הם רצו להיכנס לשוק האירופי עם מותג חדש של תמרי מג'הול מובחרים, ולשנות את האופן שבו אנשים תופסים את הפרי הזה.",
+      "עם כל הכבוד לתמר, הוא לא בדיוק הפרי הכי טרנדי בסופר. בישראל הוא עדיין מזוהה לא מעט עם המזווה של סבתא, ובאירופה הוא בכלל לא היה חלק טבעי מתפריט החטיפים היומיומי.",
+      "האתגר היה להפוך מוצר מסורתי למשהו צעיר, עכשווי ונחשק, כזה שיכול לתפוס מקום על המדף לצד חטיפי הבריאות המוכרים.",
+    ],
+  },
+  {
+    title: "הכיוון הקריאייטיבי",
+    paragraphs: [
+      "הבנתי שכדי לגרום לקהל חדש להתאהב בתמרים, צריך קודם כול לשנות את הסיפור שלהם.",
+      "במקום להציג את התמר כעוד פרי יבש, בחרנו להבליט את מה שיש בו: מתיקות טבעית, אנרגיה זמינה ויכולת להשתלב כמעט בכל רגע ביום.",
+      "חיפשתי שם שיצליח לקחת את המג'הול המוכר לעולם חדש, עם אישיות צעירה, בינלאומית ובעיקר כזאת שקל להתחבר אליה.",
+    ],
+  },
+  {
+    title: "השם הנבחר: MYJOOL",
+    paragraphs: [
+      "משחק מילים קטן שהפך לשינוי גדול בתפיסה.",
+      "החיבור בין MY ל-Medjool הפך את התמר למשהו אישי, משהו שהוא חלק מהיום שלי, מההרגלים שלי ומהרגעים הקטנים שבהם אני צריכה קצת אנרגיה.",
+      "ה-MY הפך גם לעיקרון שמוביל את השפה החזותית: דמויות מאוירות שמחבקות את התמר, מתאמנות איתו, נשענות עליו ופשוט משלבות אותו בטבעיות ביומיום שלהן.",
+      "את הסיפור השלים הטאגליין Brings out your best, שמחבר בין האנרגיה הטבעית של התמר לבין התחושה שהוא מאפשר לנו להביא לידי ביטוי את הגרסה הטובה ביותר של עצמנו.",
+      "וככה, מהפרי של סבתא נולד מותג צעיר וצבעוני, שהגיע גם למדפי Waitrose בלונדון.",
+    ],
+  },
 ];
 
-const DEESSE_PARAGRAPHS = [
-  "מורן יהב גדלה לתוך עולם היהלומים. כנכדה לסב יהלומן, האהבה לתכשיטים מלווה אותה עוד מילדות, והיום היא מעצבת תכשיטי יוקרה מזהב, יהלומים ואבני חן, עם סגנון אישי שלא מנסה לרדוף אחרי טרנדים.",
-  "כשהיא פנתה אליי, מותג התכשיטים שלה, Ne Pas Toucher, עמד בפני ריברנדינג. המטרה הייתה ליצור זהות חדשה שתשדר יוקרה בינלאומית, תפנה לנשים שמעריכות קלאסיקות שנשארות לנצח, ותוכל ללוות את המותג גם בהתרחבות שלו לקטגוריות נוספות, בהן בישום.",
-  "נשי, עוצמתי וארטיזנלי. אלה שלושת המאפיינים שהובילו אותי בחיפוש אחר השם החדש.",
-  "מהשיחות עם מורן למדתי כמה היא מחוברת לאסתטיקה ולתרבות הצרפתית, והתת מודע שלי כנראה כבר ידע לאן הוא רוצה לקחת אותי.",
-  "היה לי ברור שהשם צריך לשדר נשיות, אלגנטיות ועוצמה, בו זמנית. לא משהו מתוק או עדין מדי, אלא שם עם נוכחות, כזה שנשמע כאילו הוא שייך לבית תכשיטים בינלאומי.",
-  "למרות שאני לא דוברת צרפתית, התחלתי לחקור מילים וביטויים בשפה, לשחק עם צלילים ומשמעויות ולחפש את החיבור המדויק בין הסאונד לסיפור של המותג.",
-  "ואז נתקלתי במילה שהרגישה כאילו היא חיכתה לי שם כל הזמן.",
-  "בצרפתית, Déesse פירושו ״אלה״. שם שמצליח להחזיק בדיוק את הניגוד שחיפשתי: הוא נשי ורך, אבל גם מלא עוצמה ונוכחות. יש בו משהו אלגנטי וכמעט מלכותי, ואפילו האופן שבו האותיות שלו נראות יחד הרגיש לי נכון.",
-  "אחרי שהשם התיישב במקומו, נולד גם הטאגליין: Timeless Fine Jewelry. כי התכשיטים של מורן לא נועדו להיות הטרנד הבא. הם נועדו להישאר. תכשיטי זהב ויהלומים שילוו אותך שנים, ואולי אפילו יעברו לדור הבא.",
+const DEESSE_SECTIONS: StorySection[] = [
+  {
+    title: "האתגר",
+    paragraphs: [
+      "מורן יהב גדלה לתוך עולם היהלומים. כנכדה לסב יהלומן, האהבה לתכשיטים מלווה אותה עוד מילדות, והיום היא מעצבת תכשיטי יוקרה מזהב, יהלומים ואבני חן, עם סגנון אישי שלא מנסה לרדוף אחרי טרנדים.",
+      "כשהיא פנתה אליי, מותג התכשיטים שלה, Ne Pas Toucher, עמד בפני ריברנדינג. המטרה הייתה ליצור זהות חדשה שתשדר יוקרה בינלאומית, תפנה לנשים שמעריכות קלאסיקות שנשארות לנצח, ותוכל ללוות את המותג גם בהתרחבות שלו לקטגוריות נוספות, בהן בישום.",
+    ],
+  },
+  {
+    title: "הכיוון הקריאייטיבי",
+    paragraphs: [
+      "נשי, עוצמתי וארטיזנלי. אלה שלושת המאפיינים שהובילו אותי בחיפוש אחר השם החדש.",
+      "מהשיחות עם מורן למדתי כמה היא מחוברת לאסתטיקה ולתרבות הצרפתית, והתת מודע שלי כנראה כבר ידע לאן הוא רוצה לקחת אותי.",
+      "היה לי ברור שהשם צריך לשדר נשיות, אלגנטיות ועוצמה, בו זמנית. לא משהו מתוק או עדין מדי, אלא שם עם נוכחות, כזה שנשמע כאילו הוא שייך לבית תכשיטים בינלאומי.",
+      "למרות שאני לא דוברת צרפתית, התחלתי לחקור מילים וביטויים בשפה, לשחק עם צלילים ומשמעויות ולחפש את החיבור המדויק בין הסאונד לסיפור של המותג.",
+      "ואז נתקלתי במילה שהרגישה כאילו היא חיכתה לי שם כל הזמן.",
+    ],
+  },
+  {
+    title: "השם הנבחר: Déesse",
+    paragraphs: [
+      "בצרפתית, Déesse פירושו ״אלה״.",
+      "שם שמצליח להחזיק בדיוק את הניגוד שחיפשתי: הוא נשי ורך, אבל גם מלא עוצמה ונוכחות. יש בו משהו אלגנטי וכמעט מלכותי, ואפילו האופן שבו האותיות שלו נראות יחד הרגיש לי נכון.",
+      "אחרי שהשם התיישב במקומו, נולד גם הטאגליין: Timeless Fine Jewelry.",
+      "כי התכשיטים של מורן לא נועדו להיות הטרנד הבא. הם נועדו להישאר. תכשיטי זהב ויהלומים שילוו אותך שנים, ואולי אפילו יעברו לדור הבא.",
+    ],
+  },
 ];
 
-const REVERIE_PARAGRAPHS = [
-  "ריקי דדיה היא לא עוד שוקולטיירית. הפרלינים שלה נראים כמו יצירות אמנות קטנות, עם צבעוניות נועזת, צורות וטקסטורות מיוחדות, והכול בעבודת יד מחומרי גלם מובחרים.",
-  "אבל בזמן שהשוקולד שלה כבר שידר פרימיום בינלאומי, השם שליווה את המותג, ״ריקולטה״, כבר לא הרגיש לה נכון. ריקי רצתה שם חדש, כזה שיצליח לבטא את היצירתיות, האיכות והאישיות שלה, וגם יוכל לגדול יחד עם המותג.",
-  "בשיחות עם ריקי גיליתי עד כמה תרבות השוקולד האירופית נוכחת בעשייה שלה. את המקצוע היא למדה בצרפת ובבלגיה, וההשפעות האלה מורגשות בכל פרלין שהיא יוצרת.",
-  "היה לי ברור שהשם צריך לשדר משהו מהעולם הזה. להיות אלגנטי, בינלאומי, עם ניחוח צרפתי. אבל לא רציתי להסתפק בשם שפשוט נשמע יוקרתי.",
-  "כי בסופו של דבר, מה אנחנו באמת מחפשים כשאנחנו מתפנקים בשוקולד טוב? את הרגע הקטן הזה שבו הכול נעצר, ואפשר להתנתק לכמה שניות מהיומיום ולהתמסר להנאה.",
-  "בצרפתית, Rêverie פירושו חלום בהקיץ. וככה נולד שם שמחבר בין ההשראה האירופית של ריקי לבין החוויה שהיא יוצרת. כזה שלא מתאר את השוקולד עצמו, אלא את התחושה שהוא משאיר אחריו.",
-  "כי לפעמים כל מה שצריך כדי לברוח קצת מהמציאות זה פרלין אחד טוב.",
+const REVERIE_SECTIONS: StorySection[] = [
+  {
+    title: "האתגר",
+    paragraphs: [
+      "ריקי דדיה היא לא עוד שוקולטיירית. הפרלינים שלה נראים כמו יצירות אמנות קטנות, עם צבעוניות נועזת, צורות וטקסטורות מיוחדות, והכול בעבודת יד מחומרי גלם מובחרים.",
+      "אבל בזמן שהשוקולד שלה כבר שידר פרימיום בינלאומי, השם שליווה את המותג, ״ריקולטה״, כבר לא הרגיש לה נכון. ריקי רצתה שם חדש, כזה שיצליח לבטא את היצירתיות, האיכות והאישיות שלה, וגם יוכל לגדול יחד עם המותג.",
+    ],
+  },
+  {
+    title: "הכיוון הקריאייטיבי",
+    paragraphs: [
+      "בשיחות עם ריקי גיליתי עד כמה תרבות השוקולד האירופית נוכחת בעשייה שלה. את המקצוע היא למדה בצרפת ובבלגיה, וההשפעות האלה מורגשות בכל פרלין שהיא יוצרת.",
+      "היה לי ברור שהשם צריך לשדר משהו מהעולם הזה. להיות אלגנטי, בינלאומי, עם ניחוח צרפתי. אבל לא רציתי להסתפק בשם שפשוט נשמע יוקרתי.",
+      "כי בסופו של דבר, מה אנחנו באמת מחפשים כשאנחנו מתפנקים בשוקולד טוב? את הרגע הקטן הזה שבו הכול נעצר, ואפשר להתנתק לכמה שניות מהיומיום ולהתמסר להנאה.",
+    ],
+  },
+  {
+    title: "השם הנבחר: Rêverie",
+    paragraphs: [
+      "בצרפתית, Rêverie פירושו חלום בהקיץ.",
+      "וככה נולד שם שמחבר בין ההשראה האירופית של ריקי לבין החוויה שהיא יוצרת. כזה שלא מתאר את השוקולד עצמו, אלא את התחושה שהוא משאיר אחריו.",
+      "כי לפעמים כל מה שצריך כדי לברוח קצת מהמציאות זה פרלין אחד טוב.",
+    ],
+  },
 ];
 
 const ABOUT_PARAGRAPHS = [
@@ -503,25 +587,29 @@ function ProcessSection({ isMobile }: { isMobile: boolean }) {
     <Wrap style={{ paddingTop: isMobile ? 56 : "clamp(72px, 6.4vw, 120px)" }}>
       <section aria-labelledby="naming-process">
         <h2 id="naming-process" style={sectionHeading(isMobile)}>תהליך הניימינג</h2>
-        <ol style={{ listStyle: "none", margin: isMobile ? "28px 0 0" : "clamp(28px, 2.6vw, 44px) 0 0", padding: 0, borderBottom: `1px solid ${C.rule}` }}>
+        {/* Desktop: a 4-column grid (4 + 3). Mobile: compact list, number beside the title. */}
+        <ol style={{
+          listStyle: "none", padding: 0,
+          margin: isMobile ? "24px 0 0" : "clamp(24px, 2.2vw, 36px) 0 0",
+          display: "grid",
+          gridTemplateColumns: isMobile ? "1fr" : "repeat(4, minmax(0, 1fr))",
+          columnGap: "clamp(24px, 2.6vw, 44px)",
+          rowGap: isMobile ? 0 : "clamp(28px, 2.4vw, 40px)",
+          ...(isMobile ? { borderBottom: `1px solid ${C.rule}` } : {}),
+        }}>
           {PROCESS_STEPS.map(({ num, title, body }) => (
             <li key={num} style={{
-              display: "grid",
-              gridTemplateColumns: isMobile ? "1fr" : "64px minmax(0, 260px) minmax(0, 620px)",
-              columnGap: "clamp(24px, 3vw, 48px)",
-              rowGap: 6,
-              alignItems: "baseline",
-              padding: isMobile ? "18px 0" : "22px 0",
               borderTop: `1px solid ${C.rule}`,
+              padding: isMobile ? "14px 0" : "16px 0 0",
               textAlign: "right",
             }}>
-              <span style={{ fontFamily: EN, fontWeight: 300, fontSize: 14, lineHeight: 1, letterSpacing: "0.04em", color: C.muted }}>{num}</span>
-              <h3 style={{ margin: 0, fontFamily: HE, fontWeight: 700, fontSize: isMobile ? 17 : 18, lineHeight: 1.3, color: C.ink }}>{title}</h3>
-              <div>
-                {(Array.isArray(body) ? body : [body]).map((line, j) => (
-                  <p key={j} style={{ margin: j === 0 ? 0 : "0.6em 0 0", fontFamily: HE, fontWeight: 400, fontSize: isMobile ? 15 : 15.5, lineHeight: 1.7, color: C.body }}>{line}</p>
-                ))}
+              <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 6 }}>
+                <span style={{ fontFamily: EN, fontWeight: 300, fontSize: 13, lineHeight: 1, letterSpacing: "0.04em", color: C.muted }}>{num}</span>
+                <h3 style={{ margin: 0, fontFamily: HE, fontWeight: 700, fontSize: isMobile ? 16 : 16.5, lineHeight: 1.3, color: C.ink }}>{title}</h3>
               </div>
+              {(Array.isArray(body) ? body : [body]).map((line, j) => (
+                <p key={j} style={{ margin: j === 0 ? 0 : "0.5em 0 0", fontFamily: HE, fontWeight: 400, fontSize: isMobile ? 14.5 : 14.5, lineHeight: 1.6, color: C.body }}>{line}</p>
+              ))}
             </li>
           ))}
         </ol>
@@ -630,12 +718,11 @@ function CaseStudies({ isMobile }: { isMobile: boolean }) {
           lead={myjool.m1}
           mobileBreaks={["הם רצו", "האתגר", "משחק מילים"]}
           emphasis={["Brings out your best"]}
-          paragraphs={MYJOOL_PARAGRAPHS}
+          sections={MYJOOL_SECTIONS}
           credits={[
             { label: "מיתוג וקריאייטיב", name: "סטודיו ברוך נאה" },
             { label: "איור", name: "אלונה מילגרם" },
           ]}
-          columns={3}
           isMobile={isMobile}
         >
           <MyjoolGallery isMobile={isMobile} />
@@ -651,8 +738,7 @@ function CaseStudies({ isMobile }: { isMobile: boolean }) {
           lead={deesse.i1}
           mobileBreaks={["כשהיא פנתה אליי", "נשי, עוצמתי", "למרות שאני"]}
           emphasis={["Timeless Fine Jewelry"]}
-          paragraphs={DEESSE_PARAGRAPHS}
-          columns={3}
+          sections={DEESSE_SECTIONS}
           credits={[{ label: "מיתוג ועיצוב", name: "Hadar Mizrahi", lang: "en" }]}
           isMobile={isMobile}
         >
@@ -668,8 +754,7 @@ function CaseStudies({ isMobile }: { isMobile: boolean }) {
           heading="לגרום לכם לחלום על השוקולד הזה"
           lead={reverie.r1}
           mobileBreaks={["את המקצוע"]}
-          paragraphs={REVERIE_PARAGRAPHS}
-          columns={2}
+          sections={REVERIE_SECTIONS}
           credits={[{ label: "מיתוג ועיצוב", name: "Hadar Mizrahi", lang: "en" }]}
           isMobile={isMobile}
         >
