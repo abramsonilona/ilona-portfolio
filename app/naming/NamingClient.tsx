@@ -25,14 +25,14 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 
 // ─── Spacing ───────────────────────────────────────────────────────
 const SIDE = "clamp(20px, 5.625vw, 108px)";
-const MAX_W = 1920;
-const galleryGap = (m: boolean) => (m ? 10 : 16);
-const caseSpace = (m: boolean) => (m ? "56px" : "clamp(72px, 7.5vw, 144px)");
+const CONTENT_W = 1180; // content column; gutters sit outside it
+const galleryGap = (m: boolean) => (m ? 8 : 14);
+const caseSpace = (m: boolean) => (m ? "48px" : "clamp(64px, 6vw, 112px)");
 const sectionHeading = (m: boolean, en = false): React.CSSProperties => ({
   margin: 0,
   fontFamily: en ? EN : HE,
   fontWeight: en ? 300 : 400,
-  fontSize: m ? (en ? 40 : 36) : "clamp(36px, 3.9vw, 72px)",
+  fontSize: m ? (en ? 34 : 30) : "clamp(32px, 3vw, 52px)",
   lineHeight: 1.05,
   letterSpacing: en ? "-0.03em" : "-0.02em",
   color: C.ink,
@@ -40,7 +40,11 @@ const sectionHeading = (m: boolean, en = false): React.CSSProperties => ({
 });
 
 function Wrap({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
-  return <div style={{ maxWidth: MAX_W, margin: "0 auto", paddingInline: SIDE, boxSizing: "border-box", ...style }}>{children}</div>;
+  return (
+    <div style={{ maxWidth: `calc(${CONTENT_W}px + 2 * ${SIDE})`, margin: "0 auto", paddingInline: SIDE, boxSizing: "border-box", ...style }}>
+      {children}
+    </div>
+  );
 }
 
 // ─── Media cells: equal-height rows, no cropping ───────────────────
@@ -78,30 +82,27 @@ function Cell({ item, fixedWidth }: { item: Media; fixedWidth?: string }) {
   );
 }
 
-function MediaRow({ items, isMobile, twoUpOnMobile = false }: { items: Media[]; isMobile: boolean; twoUpOnMobile?: boolean }) {
-  const gap = galleryGap(isMobile);
-  if (isMobile && !twoUpOnMobile) {
-    return <>{items.map((it, i) => <Cell key={i} item={it} fixedWidth="100%" />)}</>;
-  }
-  if (isMobile && twoUpOnMobile) {
-    return (
-      <div style={{ display: "flex", flexWrap: "wrap", gap }}>
-        {items.map((it, i) => <Cell key={i} item={it} fixedWidth={`calc(50% - ${gap / 2}px)`} />)}
-      </div>
-    );
-  }
-  return <div style={{ display: "flex", gap }}>{items.map((it, i) => <Cell key={i} item={it} />)}</div>;
+function MediaRow({ items, isMobile }: { items: Media[]; isMobile: boolean }) {
+  return <div style={{ display: "flex", gap: galleryGap(isMobile) }}>{items.map((it, i) => <Cell key={i} item={it} />)}</div>;
 }
 
-function Gallery({ isMobile, children }: { isMobile: boolean; children: React.ReactNode }) {
+// Desktop and mobile get their own row plans, so rows stay a sensible
+// height on both (RTL: the first item in a row sits on the right).
+function Gallery({ isMobile, desktop, mobile, children }: {
+  isMobile: boolean;
+  desktop: Media[][];
+  mobile: Media[][];
+  children?: React.ReactNode; // optional lead row (e.g. before/after)
+}) {
   return (
     <div style={{
-      marginTop: isMobile ? 56 : "clamp(56px, 5.6vw, 104px)",
+      marginTop: isMobile ? 40 : "clamp(48px, 4.4vw, 80px)",
       display: "flex",
       flexDirection: "column",
       gap: galleryGap(isMobile),
     }}>
       {children}
+      {(isMobile ? mobile : desktop).map((row, i) => <MediaRow key={i} items={row} isMobile={isMobile} />)}
     </div>
   );
 }
@@ -138,7 +139,7 @@ function PosterVideo({ src, poster, label }: { src: string; poster: string; labe
           aria-label={`נגן ${label}`}
           style={{
             position: "absolute", inset: 0, margin: "auto",
-            width: 64, height: 64, borderRadius: "50%",
+            width: 56, height: 56, borderRadius: "50%",
             border: "1.5px solid #fff", background: "rgba(10,26,13,0.28)", color: "#fff",
             display: "grid", placeItems: "center", cursor: "pointer", padding: 0,
           }}
@@ -175,45 +176,49 @@ interface CaseProps {
   heading: string;
   paragraphs: string[];
   credit?: string;
+  columns: 2 | 3; // desktop text columns, by text length
   isMobile: boolean;
   children: React.ReactNode; // gallery
 }
 
-function CaseSection({ id, number, title, lang, category, heading, paragraphs, credit, isMobile, children }: CaseProps) {
+function CaseSection({ id, number, title, lang, category, heading, paragraphs, credit, columns, isMobile, children }: CaseProps) {
   const p: React.CSSProperties = {
-    fontFamily: HE, fontWeight: 400, fontSize: isMobile ? 16 : 17, lineHeight: 1.75,
-    color: C.body, margin: "0 0 1.05em",
+    fontFamily: HE, fontWeight: 400, fontSize: isMobile ? 15 : 15.5, lineHeight: 1.75,
+    color: C.body, margin: "0 0 1em",
   };
   return (
-    <article aria-labelledby={id} style={{ paddingTop: isMobile ? 40 : "clamp(48px, 4.2vw, 80px)", textAlign: "right" }}>
+    <article aria-labelledby={id} style={{ paddingTop: isMobile ? 36 : "clamp(40px, 3.6vw, 64px)", textAlign: "right" }}>
       <motion.div
         initial={{ opacity: 0, y: 14 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 0.55, ease: EASE }}
       >
-        <p style={{ fontFamily: EN, fontWeight: 300, fontSize: 16, lineHeight: 1, letterSpacing: "0.04em", color: C.muted, margin: "0 0 10px" }}>
+        <p style={{ fontFamily: EN, fontWeight: 300, fontSize: 14, lineHeight: 1, letterSpacing: "0.04em", color: C.muted, margin: "0 0 8px" }}>
           <span dir="ltr">{number}</span>
         </p>
         <h3 id={id} lang={lang} style={{
           fontFamily: EN, fontWeight: 300,
-          fontSize: isMobile ? 34 : "clamp(34px, 3.2vw, 60px)",
-          lineHeight: 1.02, letterSpacing: "-0.025em", color: C.ink, margin: 0,
+          fontSize: isMobile ? 28 : "clamp(28px, 2.4vw, 42px)",
+          lineHeight: 1.05, letterSpacing: "-0.02em", color: C.ink, margin: 0,
         }}>
           {title}
         </h3>
-        <p style={{ fontFamily: HE, fontWeight: 400, fontSize: 16, lineHeight: 1.4, color: C.muted, margin: "12px 0 0" }}>
+        <p style={{ fontFamily: HE, fontWeight: 400, fontSize: 14, lineHeight: 1.4, color: C.muted, margin: "8px 0 0" }}>
           {category}
         </p>
       </motion.div>
 
-      <div style={{ maxWidth: 680, marginTop: isMobile ? 36 : "clamp(36px, 3vw, 52px)" }}>
-        <h4 style={{ fontFamily: HE, fontWeight: 700, fontSize: 19, lineHeight: 1.4, color: C.ink, margin: "0 0 18px" }}>
+      <div style={{ marginTop: isMobile ? 28 : "clamp(28px, 2.4vw, 40px)" }}>
+        <h4 style={{ fontFamily: HE, fontWeight: 700, fontSize: isMobile ? 17 : 18, lineHeight: 1.4, color: C.ink, margin: "0 0 16px" }}>
           {heading}
         </h4>
-        {paragraphs.map((t, i) => <p key={i} style={p}>{t}</p>)}
+        {/* Desktop: text flows across 2–3 columns; mobile: one column */}
+        <div style={isMobile ? undefined : { columnCount: columns, columnGap: "clamp(32px, 3.4vw, 56px)", columnFill: "balance" }}>
+          {paragraphs.map((t, i) => <p key={i} style={{ ...p, breakInside: "avoid-column" }}>{t}</p>)}
+        </div>
         {credit && (
-          <p style={{ ...p, fontSize: 15, lineHeight: 1.6, margin: "32px 0 0" }}>
+          <p style={{ ...p, fontSize: 14, lineHeight: 1.6, margin: isMobile ? "24px 0 0" : "20px 0 0" }}>
             <b style={{ display: "block", color: C.ink, fontWeight: 700 }}>מיתוג ועיצוב</b>
             <span lang="en">{credit}</span>
           </p>
@@ -325,7 +330,7 @@ function HeroSection({ isMobile }: { isMobile: boolean }) {
         transition={{ duration: 0.7, ease: EASE }}
         style={{
           display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center",
-          padding: isMobile ? "56px 40px 52px" : `clamp(64px, 6.5vw, 112px) ${SIDE}`,
+          padding: isMobile ? "48px 40px 44px" : `clamp(56px, 5vw, 88px) ${SIDE}`,
         }}
       >
         {/* Logo + tagline as one unit — keep the file's ratio */}
@@ -336,15 +341,15 @@ function HeroSection({ isMobile }: { isMobile: boolean }) {
           height={317}
           style={{
             display: "block",
-            width: isMobile ? "min(290px, 100%)" : "clamp(280px, 28vw, 500px)",
+            width: isMobile ? "min(250px, 100%)" : "clamp(240px, 21vw, 380px)",
             height: "auto",
             aspectRatio: "565.95 / 317.13",
           }}
         />
         <h1 id="naming-title" lang="en" dir="ltr" style={{
-          margin: isMobile ? "32px 0 0" : "clamp(36px, 3vw, 52px) 0 0",
+          margin: isMobile ? "28px 0 0" : "clamp(28px, 2.4vw, 40px) 0 0",
           fontFamily: EN, fontWeight: 300,
-          fontSize: isMobile ? 16 : "clamp(18px, 1.35vw, 24px)",
+          fontSize: isMobile ? 14 : "clamp(15px, 1.1vw, 19px)",
           lineHeight: 1, letterSpacing: "0.34em", marginRight: "-0.34em",
           color: C.forest,
         }}>
@@ -356,28 +361,59 @@ function HeroSection({ isMobile }: { isMobile: boolean }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// SECTION 1b — Opening line
+// ═══════════════════════════════════════════════════════════════════
+function OpeningSection({ isMobile }: { isMobile: boolean }) {
+  return (
+    <Wrap>
+      <section aria-label="פתיח" style={{
+        textAlign: "center",
+        padding: isMobile ? "56px 4px 8px" : "clamp(72px, 6.4vw, 120px) 0 clamp(16px, 1.6vw, 28px)",
+      }}>
+        <p style={{
+          margin: "0 auto", maxWidth: isMobile ? "16em" : "none",
+          fontFamily: HE, fontWeight: 400,
+          fontSize: isMobile ? 24 : "clamp(26px, 2.4vw, 40px)",
+          lineHeight: 1.3, letterSpacing: "-0.015em", color: C.ink, textWrap: "balance",
+        }}>
+          שם הוא המילה הראשונה בסיפור שהמותג שלכם יספר.
+        </p>
+        <p lang="en" dir="ltr" style={{
+          margin: isMobile ? "14px 0 0" : "clamp(14px, 1.2vw, 20px) 0 0",
+          fontFamily: EN, fontWeight: 300,
+          fontSize: isMobile ? 14 : "clamp(14px, 1vw, 17px)",
+          lineHeight: 1.4, letterSpacing: "0.01em", color: C.muted,
+        }}>
+          With great power comes great responsibility.
+        </p>
+      </section>
+    </Wrap>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // SECTION 2 — Process
 // ═══════════════════════════════════════════════════════════════════
 function ProcessSection({ isMobile }: { isMobile: boolean }) {
   return (
-    <Wrap style={{ paddingTop: isMobile ? 56 : "clamp(72px, 6.5vw, 120px)" }}>
+    <Wrap style={{ paddingTop: isMobile ? 56 : "clamp(72px, 6.4vw, 120px)" }}>
       <section aria-labelledby="naming-process">
         <h2 id="naming-process" style={sectionHeading(isMobile)}>תהליך הניימינג</h2>
-        <ol style={{ listStyle: "none", margin: isMobile ? "36px 0 0" : "clamp(36px, 3.4vw, 56px) 0 0", padding: 0, borderBottom: `1px solid ${C.rule}` }}>
+        <ol style={{ listStyle: "none", margin: isMobile ? "28px 0 0" : "clamp(28px, 2.6vw, 44px) 0 0", padding: 0, borderBottom: `1px solid ${C.rule}` }}>
           {PROCESS_STEPS.map(({ num, title, body }) => (
             <li key={num} style={{
               display: "grid",
-              gridTemplateColumns: isMobile ? "1fr" : "88px minmax(0, 300px) minmax(0, 620px)",
-              columnGap: "clamp(24px, 3vw, 56px)",
-              rowGap: 8,
+              gridTemplateColumns: isMobile ? "1fr" : "64px minmax(0, 260px) minmax(0, 620px)",
+              columnGap: "clamp(24px, 3vw, 48px)",
+              rowGap: 6,
               alignItems: "baseline",
-              padding: isMobile ? "22px 0" : "28px 0",
+              padding: isMobile ? "18px 0" : "22px 0",
               borderTop: `1px solid ${C.rule}`,
               textAlign: "right",
             }}>
-              <span style={{ fontFamily: EN, fontWeight: 300, fontSize: 16, lineHeight: 1, letterSpacing: "0.04em", color: C.muted }}>{num}</span>
-              <h3 style={{ margin: 0, fontFamily: HE, fontWeight: 700, fontSize: isMobile ? 19 : 20, lineHeight: 1.3, color: C.ink }}>{title}</h3>
-              <p style={{ margin: 0, fontFamily: HE, fontWeight: 400, fontSize: isMobile ? 16 : 17, lineHeight: 1.7, color: C.body }}>{body}</p>
+              <span style={{ fontFamily: EN, fontWeight: 300, fontSize: 14, lineHeight: 1, letterSpacing: "0.04em", color: C.muted }}>{num}</span>
+              <h3 style={{ margin: 0, fontFamily: HE, fontWeight: 700, fontSize: isMobile ? 17 : 18, lineHeight: 1.3, color: C.ink }}>{title}</h3>
+              <p style={{ margin: 0, fontFamily: HE, fontWeight: 400, fontSize: isMobile ? 15 : 15.5, lineHeight: 1.7, color: C.body }}>{body}</p>
             </li>
           ))}
         </ol>
@@ -401,11 +437,13 @@ const myjool = {
 } satisfies Record<string, Media>;
 
 function MyjoolGallery({ isMobile }: { isMobile: boolean }) {
+  const m = myjool;
   return (
-    <Gallery isMobile={isMobile}>
-      <MediaRow isMobile={isMobile} items={[myjool.m2, myjool.m3, myjool.m4]} />
-      <MediaRow isMobile={isMobile} twoUpOnMobile items={[myjool.m1, myjool.m5, myjool.m6, myjool.m7]} />
-    </Gallery>
+    <Gallery
+      isMobile={isMobile}
+      desktop={[[m.m2, m.m3, m.m4], [m.m1, m.m5, m.m6, m.m7]]}
+      mobile={[[m.m2], [m.m3, m.m4], [m.m1, m.m5], [m.m6, m.m7]]}
+    />
   );
 }
 
@@ -419,21 +457,21 @@ const deesse = {
 } satisfies Record<string, Media>;
 
 function DeesseGallery({ isMobile }: { isMobile: boolean }) {
-  // RTL: first item sits on the right
+  const d = deesse;
   return (
-    <Gallery isMobile={isMobile}>
-      <MediaRow isMobile={isMobile} items={[deesse.v2, deesse.i1]} />
-      <MediaRow isMobile={isMobile} items={[deesse.i3]} />
-      <MediaRow isMobile={isMobile} items={[deesse.i5, deesse.v4]} />
-    </Gallery>
+    <Gallery
+      isMobile={isMobile}
+      desktop={[[d.v2, d.i1, d.v4], [d.i3, d.i5]]}
+      mobile={[[d.v2, d.v4], [d.i1, d.i5], [d.i3]]}
+    />
   );
 }
 
 const RE = "/naming/reverie/";
 const reverie = {
   before: { kind: "img", src: RE + "before picture.jpg", alt: "לפני — ריקולטה", w: 7594, h: 5063 },
-  r1: { kind: "img", src: RE + "Reverie-01.jpg", alt: "אחרי — Rêverie", w: 1222, h: 1523 },
-  r2: { kind: "img", src: RE + "Reverie-02.jpg", alt: "Rêverie 2", w: 1222, h: 1523 },
+  r1: { kind: "img", src: RE + "Reverie-01.jpg", alt: "Rêverie 1", w: 1222, h: 1523 },
+  r2: { kind: "img", src: RE + "Reverie-02.jpg", alt: "אחרי — Rêverie", w: 1222, h: 1523 },
   r3: { kind: "img", src: RE + "Reverie-03.jpg", alt: "Rêverie 3", w: 1222, h: 1523 },
   r4: { kind: "img", src: RE + "Reverie-04.jpg", alt: "Rêverie 4", w: 1222, h: 1523 },
   r5: { kind: "img", src: RE + "Reverie-05.jpg", alt: "Rêverie 5", w: 1222, h: 1523 },
@@ -442,15 +480,19 @@ const reverie = {
 
 function ReverieGallery({ isMobile }: { isMobile: boolean }) {
   const gap = galleryGap(isMobile);
+  const r = reverie;
   return (
-    <Gallery isMobile={isMobile}>
-      {/* לפני right / אחרי left on desktop; לפני above אחרי on mobile */}
+    <Gallery
+      isMobile={isMobile}
+      desktop={[[r.r1, r.r3, r.r4, r.r5, r.r6]]}
+      mobile={[[r.r1, r.r3], [r.r4, r.r5], [r.r6]]}
+    >
+      {/* Before (old box) next to the new packaging trio:
+          לפני right / אחרי left on desktop; לפני above אחרי on mobile */}
       <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap }}>
-        <LabeledCell label="לפני" item={reverie.before} isMobile={isMobile} />
-        <LabeledCell label="אחרי" item={reverie.r1} isMobile={isMobile} />
+        <LabeledCell label="לפני" item={r.before} isMobile={isMobile} />
+        <LabeledCell label="אחרי" item={r.r2} isMobile={isMobile} />
       </div>
-      <MediaRow isMobile={isMobile} items={[reverie.r2, reverie.r3]} />
-      <MediaRow isMobile={isMobile} items={[reverie.r4, reverie.r5, reverie.r6]} />
     </Gallery>
   );
 }
@@ -462,10 +504,10 @@ function CaseStudies({ isMobile }: { isMobile: boolean }) {
   return (
     <Wrap>
       <section aria-labelledby="naming-cases">
-        <div style={{ marginTop: isMobile ? 96 : "clamp(120px, 11vw, 208px)" }}>
+        <div style={{ marginTop: isMobile ? 80 : "clamp(96px, 8.4vw, 160px)" }}>
           <h2 id="naming-cases" lang="en" style={{
             ...sectionHeading(isMobile, true),
-            paddingBottom: isMobile ? 20 : "clamp(20px, 1.8vw, 32px)",
+            paddingBottom: isMobile ? 16 : "clamp(16px, 1.4vw, 24px)",
             borderBottom: `2px solid ${C.ink}`,
           }}>
             Case Studies
@@ -477,6 +519,7 @@ function CaseStudies({ isMobile }: { isMobile: boolean }) {
           category="ניימינג | טאגליין"
           heading="מהמזווה של סבתא למדפי Waitrose בלונדון"
           paragraphs={MYJOOL_PARAGRAPHS}
+          columns={3}
           isMobile={isMobile}
         >
           <MyjoolGallery isMobile={isMobile} />
@@ -489,6 +532,7 @@ function CaseStudies({ isMobile }: { isMobile: boolean }) {
           category="ניימינג | טאגליין"
           heading="השם שברא את עצמו"
           paragraphs={DEESSE_PARAGRAPHS}
+          columns={3}
           credit="Hadar Mizrahi"
           isMobile={isMobile}
         >
@@ -502,6 +546,7 @@ function CaseStudies({ isMobile }: { isMobile: boolean }) {
           category="ניימינג | טאגליין"
           heading="לגרום לכם לחלום על השוקולד הזה"
           paragraphs={REVERIE_PARAGRAPHS}
+          columns={2}
           credit="Hadar Mizrahi"
           isMobile={isMobile}
         >
@@ -519,28 +564,28 @@ function AboutSection({ isMobile }: { isMobile: boolean }) {
   return (
     <Wrap>
       <section aria-labelledby="naming-about" style={{
-        marginTop: isMobile ? 96 : "clamp(120px, 11vw, 208px)",
-        paddingTop: isMobile ? 40 : "clamp(48px, 4.2vw, 80px)",
+        marginTop: isMobile ? 80 : "clamp(96px, 8.4vw, 160px)",
+        paddingTop: isMobile ? 36 : "clamp(40px, 3.6vw, 64px)",
         borderTop: `1px solid ${C.caseRule}`,
         display: "grid",
-        gridTemplateColumns: isMobile ? "1fr" : "minmax(0, 7fr) minmax(0, 5fr)",
-        gap: isMobile ? 36 : "clamp(40px, 6vw, 120px)",
+        gridTemplateColumns: isMobile ? "1fr" : "minmax(0, 7fr) minmax(0, 4fr)",
+        gap: isMobile ? 32 : "clamp(40px, 5vw, 96px)",
         alignItems: "center",
       }}>
         <div style={{ maxWidth: 640, textAlign: "right" }}>
           <h2 id="naming-about" style={sectionHeading(isMobile)}>נעים מאוד</h2>
-          <p style={{ fontFamily: HE, fontWeight: 400, fontSize: 17, lineHeight: 1.5, color: C.muted, margin: "14px 0 36px" }}>
+          <p style={{ fontFamily: HE, fontWeight: 400, fontSize: 15, lineHeight: 1.5, color: C.muted, margin: "10px 0 28px" }}>
             אילונה אברמסון, אסטרטגית מותג וזהות מילולית
           </p>
           {ABOUT_PARAGRAPHS.map((t, i) => (
-            <p key={i} style={{ fontFamily: HE, fontWeight: 400, fontSize: isMobile ? 16 : 17, lineHeight: 1.75, color: C.body, margin: "0 0 1.05em" }}>{t}</p>
+            <p key={i} style={{ fontFamily: HE, fontWeight: 400, fontSize: isMobile ? 15 : 15.5, lineHeight: 1.75, color: C.body, margin: "0 0 1em" }}>{t}</p>
           ))}
-          <p style={{ fontFamily: HE, fontWeight: 700, fontSize: 20, lineHeight: 1.5, color: C.ink, margin: "32px 0 0" }}>
+          <p style={{ fontFamily: HE, fontWeight: 700, fontSize: isMobile ? 17 : 18, lineHeight: 1.5, color: C.ink, margin: "24px 0 0" }}>
             {ABOUT_CLOSING}
           </p>
         </div>
         <figure style={{
-          margin: 0, justifySelf: "start", width: "100%", maxWidth: isMobile ? "none" : 520,
+          margin: 0, justifySelf: "start", width: "100%", maxWidth: isMobile ? 360 : 400,
           aspectRatio: "848 / 1131", position: "relative", background: C.media,
         }}>
           <img src="/naming/about-photo.jpg" alt="אילונה אברמסון" width={848} height={1131} loading="lazy"
@@ -565,11 +610,11 @@ function ThankYouSection({ isMobile }: { isMobile: boolean }) {
     <Wrap>
       <section aria-labelledby="naming-thanks" style={{
         textAlign: "center",
-        padding: isMobile ? "96px 0 72px" : "clamp(120px, 10vw, 192px) 0 clamp(80px, 7vw, 128px)",
+        padding: isMobile ? "80px 0 64px" : "clamp(96px, 8vw, 152px) 0 clamp(72px, 6vw, 112px)",
       }}>
         <h2 id="naming-thanks" lang="en" style={{
           margin: 0, fontFamily: EN, fontWeight: 300,
-          fontSize: isMobile ? 44 : "clamp(44px, 5.4vw, 104px)",
+          fontSize: isMobile ? 38 : "clamp(38px, 4vw, 72px)",
           lineHeight: 1, letterSpacing: "-0.03em", color: C.ink,
         }}>
           THANK YOU
@@ -578,7 +623,7 @@ function ThankYouSection({ isMobile }: { isMobile: boolean }) {
           listStyle: "none", padding: 0, margin: isMobile ? "32px 0 0" : "clamp(32px, 3vw, 48px) 0 0",
           display: "flex", flexDirection: isMobile ? "column" : "row", flexWrap: "wrap",
           justifyContent: "center", alignItems: "center", gap: isMobile ? 14 : "12px 48px",
-          fontFamily: EN, fontWeight: 300, fontSize: 18, lineHeight: 1.4,
+          fontFamily: EN, fontWeight: 300, fontSize: isMobile ? 16 : 17, lineHeight: 1.4,
         }}>
           {CONTACTS.map(({ display, href }) => {
             const ext = href.startsWith("http");
@@ -612,6 +657,7 @@ export default function NamingClient() {
     <div style={{ background: C.cream, color: C.ink, direction: "rtl", overflowX: "clip" }}>
       <style>{`.naming-link:hover{color:${C.violet} !important;text-decoration-thickness:2px !important}`}</style>
       <HeroSection isMobile={isMobile} />
+      <OpeningSection isMobile={isMobile} />
       <ProcessSection isMobile={isMobile} />
       <CaseStudies isMobile={isMobile} />
       <AboutSection isMobile={isMobile} />
