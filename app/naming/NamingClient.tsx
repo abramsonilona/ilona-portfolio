@@ -176,6 +176,32 @@ function LabeledCell({ label, item, isMobile }: { label: string; item: Media; is
   );
 }
 
+// ─── Text helpers ──────────────────────────────────────────────────
+// Split a text into blocks, each new block starting at one of the phrases.
+function splitAt(text: string, phrases: string[]): string[] {
+  const cuts = phrases
+    .map(ph => text.indexOf(ph))
+    .filter(i => i > 0)
+    .sort((a, b) => a - b);
+  const out: string[] = [];
+  let from = 0;
+  for (const c of cuts) { out.push(text.slice(from, c).trim()); from = c; }
+  out.push(text.slice(from).trim());
+  return out.filter(Boolean);
+}
+
+// Set the given phrases in bold (case-insensitive match, original casing kept).
+function withEmphasis(text: string, phrases: string[]): React.ReactNode {
+  if (!phrases.length) return text;
+  const esc = phrases.map(ph => ph.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  const parts = text.split(new RegExp(`(${esc.join("|")})`, "i"));
+  return parts.map((part, i) =>
+    phrases.some(ph => ph.toLowerCase() === part.toLowerCase())
+      ? <b key={i} style={{ fontWeight: 700, color: C.ink }}>{part}</b>
+      : part
+  );
+}
+
 // ─── Shared case layout ────────────────────────────────────────────
 interface CaseProps {
   id: string;
@@ -188,13 +214,15 @@ interface CaseProps {
   heading: string;
   paragraphs: string[];
   credits?: { label: string; name: string; lang?: "he" | "en" }[];
+  mobileBreaks: string[]; // mobile: start a new line at each of these phrases
+  emphasis?: string[];    // phrases set in bold (taglines)
   lead: Media; // mobile only: one image right under the brand name
   columns: 2 | 3; // desktop text columns, by text length
   isMobile: boolean;
   children: React.ReactNode; // gallery
 }
 
-function CaseSection({ id, number, title, lang, descriptor, descriptorLang, category, heading, paragraphs, credits, lead, columns, isMobile, children }: CaseProps) {
+function CaseSection({ id, number, title, lang, descriptor, descriptorLang, category, heading, paragraphs, credits, mobileBreaks, emphasis = [], lead, columns, isMobile, children }: CaseProps) {
   const p: React.CSSProperties = {
     fontFamily: HE, fontWeight: 400, fontSize: isMobile ? 15 : 15.5, lineHeight: 1.75,
     color: C.body, margin: "0 0 1em",
@@ -246,11 +274,13 @@ function CaseSection({ id, number, title, lang, descriptor, descriptorLang, cate
         </h4>
         {/* Desktop: text flows across 2 or 3 columns; mobile: one column */}
         {isMobile ? (
-          // Mobile: the whole story as one continuous block of text
-          <p style={{ ...p, margin: 0 }}>{paragraphs.join(" ")}</p>
+          // Mobile: the story in a few blocks, breaking only where chosen
+          splitAt(paragraphs.join(" "), mobileBreaks).map((t, i) => (
+            <p key={i} style={{ ...p, margin: i === 0 ? 0 : "0.75em 0 0" }}>{withEmphasis(t, emphasis)}</p>
+          ))
         ) : (
           <div style={{ columnCount: columns, columnGap: "clamp(32px, 3.4vw, 56px)", columnFill: "balance" }}>
-            {paragraphs.map((t, i) => <p key={i} style={{ ...p, breakInside: "avoid-column" }}>{t}</p>)}
+            {paragraphs.map((t, i) => <p key={i} style={{ ...p, breakInside: "avoid-column" }}>{withEmphasis(t, emphasis)}</p>)}
           </div>
         )}
         {credits && credits.length > 0 && (
@@ -598,6 +628,8 @@ function CaseStudies({ isMobile }: { isMobile: boolean }) {
           category="ניימינג | טאגליין"
           heading="מהמזווה של סבתא למדפי Waitrose בלונדון"
           lead={myjool.m1}
+          mobileBreaks={["הם רצו", "האתגר", "משחק מילים"]}
+          emphasis={["Brings out your best"]}
           paragraphs={MYJOOL_PARAGRAPHS}
           credits={[
             { label: "מיתוג וקריאייטיב", name: "סטודיו ברוך נאה" },
@@ -617,6 +649,8 @@ function CaseStudies({ isMobile }: { isMobile: boolean }) {
           category="ניימינג | טאגליין"
           heading="השם שברא את עצמו"
           lead={deesse.i1}
+          mobileBreaks={["כשהיא פנתה אליי", "נשי, עוצמתי", "למרות שאני"]}
+          emphasis={["Timeless Fine Jewelry"]}
           paragraphs={DEESSE_PARAGRAPHS}
           columns={3}
           credits={[{ label: "מיתוג ועיצוב", name: "Hadar Mizrahi", lang: "en" }]}
@@ -633,6 +667,7 @@ function CaseStudies({ isMobile }: { isMobile: boolean }) {
           category="ניימינג | טאגליין"
           heading="לגרום לכם לחלום על השוקולד הזה"
           lead={reverie.r1}
+          mobileBreaks={["את המקצוע"]}
           paragraphs={REVERIE_PARAGRAPHS}
           columns={2}
           credits={[{ label: "מיתוג ועיצוב", name: "Hadar Mizrahi", lang: "en" }]}
