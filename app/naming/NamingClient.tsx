@@ -5,227 +5,232 @@ import { motion } from "framer-motion";
 import ProjectFooter from "@/components/layout/ProjectFooter";
 import { useIsMobile } from "@/hooks/useIsMobile";
 
-// ─── Design tokens (matches project pages) ────────────────────────
+// ─── Design tokens (Naming v2) ─────────────────────────────────────
 const C = {
   ink:    "#0a1a0d",
-  ink2:   "#4a544c",
-  ink3:   "#87908a",
+  forest: "#002607",
+  body:   "#3d463f",
+  muted:  "#5f675f", // ≥4.5:1 on cream
   cream:  "#fcf7f4",
   lilac:  "#e8d4ff",
-  line:   "#e7e1d8",
+  rule:   "#ddd6cd", // step rules
+  caseRule: "#cfc7bd", // between cases
+  media:  "#efe8e1",
   violet: "#a173ea",
-  lime:   "#e0ff5c",
 };
 
 const HE = "var(--font-heading)";
 const EN = "var(--font-body-en)";
+const EASE = [0.22, 1, 0.36, 1] as const;
 
-// ─── Shared spacing helpers ────────────────────────────────────────
-const hPad = (m: boolean) => m ? 20 : 108;
-const CASE_GAP = (m: boolean) => m ? 80 : 128;
-const SECTION_GAP = (m: boolean) => m ? 48 : 80;
+// ─── Spacing ───────────────────────────────────────────────────────
+const SIDE = "clamp(20px, 5.625vw, 108px)";
+const MAX_W = 1920;
+const galleryGap = (m: boolean) => (m ? 10 : 16);
+const caseSpace = (m: boolean) => (m ? "56px" : "clamp(72px, 7.5vw, 144px)");
+const sectionHeading = (m: boolean, en = false): React.CSSProperties => ({
+  margin: 0,
+  fontFamily: en ? EN : HE,
+  fontWeight: en ? 300 : 400,
+  fontSize: m ? (en ? 40 : 36) : "clamp(36px, 3.9vw, 72px)",
+  lineHeight: 1.05,
+  letterSpacing: en ? "-0.03em" : "-0.02em",
+  color: C.ink,
+  textAlign: "right",
+});
 
-// ─── Inline video with autoplay + play/pause overlay ──────────────
-function GalleryVideo({ src, style }: { src: string; style?: React.CSSProperties }) {
-  const ref = useRef<HTMLVideoElement>(null);
-  const [playing, setPlaying] = useState(true);
+function Wrap({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+  return <div style={{ maxWidth: MAX_W, margin: "0 auto", paddingInline: SIDE, boxSizing: "border-box", ...style }}>{children}</div>;
+}
 
-  const toggle = () => {
-    const v = ref.current;
-    if (!v) return;
-    if (v.paused) { v.play(); setPlaying(true); }
-    else { v.pause(); setPlaying(false); }
-  };
+// ─── Media cells: equal-height rows, no cropping ───────────────────
+// Each cell grows in proportion to its aspect ratio (w/h), so every
+// cell in a row ends up the same height and keeps its native ratio.
+type Media =
+  | { kind: "img"; src: string; alt: string; w: number; h: number }
+  | { kind: "video"; src: string; poster: string; label: string; w: number; h: number };
 
+function Cell({ item, fixedWidth }: { item: Media; fixedWidth?: string }) {
+  const ratio = item.w / item.h;
   return (
-    <div onClick={toggle} style={{ position: "relative", overflow: "hidden", cursor: "pointer", ...style }}>
-      <video
-        ref={ref}
-        autoPlay muted loop playsInline
-        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-      >
-        <source src={src} type="video/mp4" />
-      </video>
-      <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-        <div style={{ width: 48, height: 48, borderRadius: "50%", background: "rgba(255,255,255,0.88)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          {playing
-            ? <svg width="14" height="14" viewBox="0 0 24 24" fill="#111"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-            : <svg width="14" height="14" viewBox="0 0 24 24" fill="#111" style={{ marginRight: -3 }}><polygon points="5,3 19,12 5,21"/></svg>
-          }
-        </div>
-      </div>
+    <div style={{
+      position: "relative",
+      minWidth: 0,
+      overflow: "hidden",
+      background: C.media,
+      aspectRatio: `${item.w} / ${item.h}`,
+      ...(fixedWidth ? { width: fixedWidth, flex: "none" } : { flex: `${ratio} 1 0` }),
+    }}>
+      {item.kind === "img" ? (
+        <img
+          src={item.src}
+          alt={item.alt}
+          width={item.w}
+          height={item.h}
+          loading="lazy"
+          decoding="async"
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+        />
+      ) : (
+        <PosterVideo src={item.src} poster={item.poster} label={item.label} />
+      )}
     </div>
   );
 }
 
-// ─── Shared case layout ────────────────────────────────────────────
-interface CaseProps {
-  number: string;
-  title: string;
-  titleEn?: boolean;
-  category: string;
-  heading: string;
-  paragraphs: string[];
-  credit?: string;
-  creditLabel?: string;
-  isMobile: boolean;
-  children: React.ReactNode; // gallery
+function MediaRow({ items, isMobile, twoUpOnMobile = false }: { items: Media[]; isMobile: boolean; twoUpOnMobile?: boolean }) {
+  const gap = galleryGap(isMobile);
+  if (isMobile && !twoUpOnMobile) {
+    return <>{items.map((it, i) => <Cell key={i} item={it} fixedWidth="100%" />)}</>;
+  }
+  if (isMobile && twoUpOnMobile) {
+    return (
+      <div style={{ display: "flex", flexWrap: "wrap", gap }}>
+        {items.map((it, i) => <Cell key={i} item={it} fixedWidth={`calc(50% - ${gap / 2}px)`} />)}
+      </div>
+    );
+  }
+  return <div style={{ display: "flex", gap }}>{items.map((it, i) => <Cell key={i} item={it} />)}</div>;
 }
 
-function CaseSection({ number, title, titleEn = false, category, heading, paragraphs, credit, creditLabel, isMobile, children }: CaseProps) {
-  const pad = hPad(isMobile);
+function Gallery({ isMobile, children }: { isMobile: boolean; children: React.ReactNode }) {
   return (
-    <div>
-      {/* Title block */}
-      <section style={{ padding: isMobile ? `0 ${pad}px 0` : `0 ${pad}px` }}>
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          style={{ textAlign: "right" }}
-        >
-          <p style={{ fontFamily: HE, fontWeight: 400, fontSize: 12, color: C.ink3, margin: "0 0 10px", letterSpacing: "0.08em" }}>
-            {number}
-          </p>
-          <h2 style={{
-            fontFamily: titleEn ? EN : HE,
-            fontWeight: titleEn ? 300 : 700,
-            fontSize: isMobile ? "clamp(32px,9vw,52px)" : "clamp(44px,5.5vw,72px)",
-            lineHeight: 1.05,
-            letterSpacing: titleEn ? "-0.02em" : "-0.015em",
-            color: C.ink,
-            margin: "0 0 10px",
-          }}>
-            {title}
-          </h2>
-          <p style={{ fontFamily: HE, fontWeight: 400, fontSize: isMobile ? 12 : 14, color: C.ink3, margin: 0 }}>
-            {category}
-          </p>
-        </motion.div>
-      </section>
-
-      {/* Text block */}
-      <section style={{ padding: isMobile ? `32px ${pad}px ${SECTION_GAP(isMobile)}px` : `48px ${pad}px ${SECTION_GAP(isMobile)}px` }}>
-        <div style={{ textAlign: "right", maxWidth: 1130 }}>
-          <h3 style={{
-            fontFamily: HE,
-            fontWeight: 700,
-            fontSize: isMobile ? 17 : "clamp(18px,1.4vw,22px)",
-            lineHeight: 1.3,
-            letterSpacing: "-0.015em",
-            color: C.ink,
-            margin: "0 0 20px",
-          }}>
-            {heading}
-          </h3>
-          {paragraphs.map((p, i) => (
-            <p key={i} style={{
-              fontFamily: HE,
-              fontWeight: 400,
-              fontSize: isMobile ? 15 : 16,
-              lineHeight: 1.85,
-              color: C.ink2,
-              margin: "0 0 14px",
-            }}>
-              {p}
-            </p>
-          ))}
-          {credit && (
-            <div style={{ marginTop: 24, borderTop: `1px solid ${C.line}`, paddingTop: 20 }}>
-              <p style={{ fontFamily: HE, fontWeight: 700, fontSize: 13, color: C.ink, margin: "0 0 5px" }}>
-                {creditLabel ?? "מיתוג ועיצוב"}
-              </p>
-              <span style={{ fontFamily: EN, fontWeight: 300, fontSize: 14, color: C.ink3 }}>
-                {credit}
-              </span>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Gallery */}
+    <div style={{
+      marginTop: isMobile ? 56 : "clamp(56px, 5.6vw, 104px)",
+      display: "flex",
+      flexDirection: "column",
+      gap: galleryGap(isMobile),
+    }}>
       {children}
     </div>
   );
 }
 
-// ─── Case divider ──────────────────────────────────────────────────
-function CaseDivider({ isMobile }: { isMobile: boolean }) {
-  const gap = CASE_GAP(isMobile);
-  return <div style={{ height: gap }} />;
-}
+// ─── Video: poster + centred play button, plays with sound on click ─
+function PosterVideo({ src, poster, label }: { src: string; poster: string; label: string }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  const [started, setStarted] = useState(false);
 
-// ═══════════════════════════════════════════════════════════════════
-// SECTION 1 — Hero
-// ═══════════════════════════════════════════════════════════════════
-function HeroSection({ isMobile }: { isMobile: boolean }) {
+  const start = () => {
+    const v = ref.current;
+    if (!v) return;
+    setStarted(true);
+    v.play().catch(() => {});
+  };
+
   return (
-    <section style={{
-      background: C.lilac,
-      marginTop: isMobile ? 47 : 53,
-      minHeight: isMobile ? "100svh" : "100vh",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: isMobile ? "60px 24px" : "80px 56px",
-      textAlign: "center",
-    }}>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-        style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: isMobile ? 24 : 32 }}
+    <>
+      <video
+        ref={ref}
+        poster={poster}
+        preload="none"
+        playsInline
+        controls={started}
+        aria-label={label}
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", display: "block" }}
       >
-        {/* Logo */}
-        <img
-          src="/logo.png.png"
-          alt="Ilona Abramson"
+        <source src={src} type="video/mp4" />
+      </video>
+      {!started && (
+        <button
+          type="button"
+          onClick={start}
+          aria-label={`נגן ${label}`}
           style={{
-            height: isMobile ? 28 : 40,
-            width: "auto",
-            display: "block",
-            objectFit: "contain",
+            position: "absolute", inset: 0, margin: "auto",
+            width: 64, height: 64, borderRadius: "50%",
+            border: "1.5px solid #fff", background: "rgba(10,26,13,0.28)", color: "#fff",
+            display: "grid", placeItems: "center", cursor: "pointer", padding: 0,
           }}
-        />
-
-        {/* Tagline */}
-        <p style={{
-          fontFamily: HE,
-          fontWeight: 400,
-          fontSize: isMobile ? 15 : 18,
-          color: C.ink2,
-          margin: 0,
-          letterSpacing: "0.01em",
-        }}>
-          אסטרטגיית מותג ושפה
-        </p>
-
-        {/* Divider */}
-        <div style={{ width: 1, height: isMobile ? 40 : 56, background: C.ink, opacity: 0.2 }} />
-
-        {/* NAMING */}
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-          <p style={{
-            fontFamily: EN,
-            fontWeight: 300,
-            fontSize: isMobile ? "clamp(52px, 18vw, 80px)" : "clamp(80px, 10vw, 140px)",
-            letterSpacing: "-0.03em",
-            lineHeight: 1,
-            color: C.ink,
-            margin: 0,
-          }}>
-            NAMING
-          </p>
-        </div>
-      </motion.div>
-    </section>
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style={{ marginRight: -3 }}>
+            <path d="M8 5v14l11-7z" fill="currentColor" />
+          </svg>
+        </button>
+      )}
+    </>
   );
 }
 
+// ─── Before / after figure (label above, same row height) ───────────
+function LabeledCell({ label, item, isMobile }: { label: string; item: Media; isMobile: boolean }) {
+  return (
+    <figure style={{
+      margin: 0, minWidth: 0, display: "flex", flexDirection: "column", gap: 12,
+      ...(isMobile ? { width: "100%" } : { flex: `${item.w / item.h} 1 0` }),
+    }}>
+      <figcaption style={{ fontFamily: HE, fontWeight: 700, fontSize: 15, lineHeight: 1, color: C.ink, textAlign: "right" }}>{label}</figcaption>
+      <Cell item={item} fixedWidth="100%" />
+    </figure>
+  );
+}
+
+// ─── Shared case layout ────────────────────────────────────────────
+interface CaseProps {
+  id: string;
+  number: string;
+  title: string;
+  lang: string;
+  category: string;
+  heading: string;
+  paragraphs: string[];
+  credit?: string;
+  isMobile: boolean;
+  children: React.ReactNode; // gallery
+}
+
+function CaseSection({ id, number, title, lang, category, heading, paragraphs, credit, isMobile, children }: CaseProps) {
+  const p: React.CSSProperties = {
+    fontFamily: HE, fontWeight: 400, fontSize: isMobile ? 16 : 17, lineHeight: 1.75,
+    color: C.body, margin: "0 0 1.05em",
+  };
+  return (
+    <article aria-labelledby={id} style={{ paddingTop: isMobile ? 40 : "clamp(48px, 4.2vw, 80px)", textAlign: "right" }}>
+      <motion.div
+        initial={{ opacity: 0, y: 14 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.55, ease: EASE }}
+      >
+        <p style={{ fontFamily: EN, fontWeight: 300, fontSize: 16, lineHeight: 1, letterSpacing: "0.04em", color: C.muted, margin: "0 0 10px" }}>
+          <span dir="ltr">{number}</span>
+        </p>
+        <h3 id={id} lang={lang} style={{
+          fontFamily: EN, fontWeight: 300,
+          fontSize: isMobile ? 34 : "clamp(34px, 3.2vw, 60px)",
+          lineHeight: 1.02, letterSpacing: "-0.025em", color: C.ink, margin: 0,
+        }}>
+          {title}
+        </h3>
+        <p style={{ fontFamily: HE, fontWeight: 400, fontSize: 16, lineHeight: 1.4, color: C.muted, margin: "12px 0 0" }}>
+          {category}
+        </p>
+      </motion.div>
+
+      <div style={{ maxWidth: 680, marginTop: isMobile ? 36 : "clamp(36px, 3vw, 52px)" }}>
+        <h4 style={{ fontFamily: HE, fontWeight: 700, fontSize: 19, lineHeight: 1.4, color: C.ink, margin: "0 0 18px" }}>
+          {heading}
+        </h4>
+        {paragraphs.map((t, i) => <p key={i} style={p}>{t}</p>)}
+        {credit && (
+          <p style={{ ...p, fontSize: 15, lineHeight: 1.6, margin: "32px 0 0" }}>
+            <b style={{ display: "block", color: C.ink, fontWeight: 700 }}>מיתוג ועיצוב</b>
+            <span lang="en">{credit}</span>
+          </p>
+        )}
+      </div>
+
+      {children}
+    </article>
+  );
+}
+
+function CaseRule({ isMobile }: { isMobile: boolean }) {
+  return <hr style={{ margin: `${caseSpace(isMobile)} 0 0`, border: 0, borderTop: `1px solid ${C.caseRule}` }} />;
+}
+
 // ═══════════════════════════════════════════════════════════════════
-// SECTION 2 — Process
+// CONTENT (unchanged copy)
 // ═══════════════════════════════════════════════════════════════════
 const PROCESS_STEPS = [
   {
@@ -265,91 +270,6 @@ const PROCESS_STEPS = [
   },
 ];
 
-function ProcessSection({ isMobile }: { isMobile: boolean }) {
-  const pad = hPad(isMobile);
-  return (
-    <section style={{
-      padding: isMobile
-        ? `${SECTION_GAP(isMobile)}px ${pad}px ${SECTION_GAP(isMobile)}px`
-        : `${SECTION_GAP(isMobile)}px ${pad}px ${SECTION_GAP(isMobile)}px`,
-      background: C.cream,
-    }}>
-      <motion.h2
-        initial={{ opacity: 0, y: 12 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-60px" }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        style={{
-          fontFamily: HE,
-          fontWeight: 700,
-          fontSize: isMobile ? 20 : "clamp(22px, 2.2vw, 30px)",
-          color: C.ink,
-          textAlign: "right",
-          margin: "0 0 48px",
-          letterSpacing: "-0.015em",
-        }}
-      >
-        תהליך הניימינג
-      </motion.h2>
-
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: isMobile ? "1fr" : "repeat(2, 1fr)",
-        gap: isMobile ? "32px 0" : "48px 64px",
-        maxWidth: 1280,
-      }}>
-        {PROCESS_STEPS.map(({ num, title, body }, i) => (
-          <motion.div
-            key={num}
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-40px" }}
-            transition={{ duration: 0.5, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }}
-            style={{ textAlign: "right", borderTop: `1px solid ${C.line}`, paddingTop: 20 }}
-          >
-            <p style={{ fontFamily: EN, fontWeight: 300, fontSize: 12, color: C.ink3, margin: "0 0 10px", direction: "ltr", textAlign: "right" }}>
-              {num}
-            </p>
-            <h3 style={{
-              fontFamily: HE,
-              fontWeight: 700,
-              fontSize: isMobile ? 16 : 17,
-              color: C.ink,
-              margin: "0 0 10px",
-              lineHeight: 1.3,
-            }}>
-              {title}
-            </h3>
-            <p style={{
-              fontFamily: HE,
-              fontWeight: 400,
-              fontSize: isMobile ? 14 : 15,
-              lineHeight: 1.75,
-              color: C.ink2,
-              margin: 0,
-            }}>
-              {body}
-            </p>
-          </motion.div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// CASE #1 — MYJOOL
-// ═══════════════════════════════════════════════════════════════════
-const MYJOOL_IMAGES = [
-  "/naming/Myjool/511197033_10163047046733485_4456798310964133825_n.jpg",
-  "/naming/Myjool/512064747_10162661104254920_2510028380173325386_n.jpg",
-  "/naming/Myjool/512587925_10162661104059920_4341441496912268612_n.jpg",
-  "/naming/Myjool/513933162_10162661104264920_5119242861589211427_n.jpg",
-  "/naming/Myjool/WhatsApp Image 2023-02-24 at 09.27.57 (1).jpeg",
-  "/naming/Myjool/WhatsApp Image 2023-02-24 at 09.27.57 (3).jpeg",
-  "/naming/Myjool/WhatsApp Image 2023-02-24 at 09.27.57 (4).jpeg",
-];
-
 const MYJOOL_PARAGRAPHS = [
   "בשיחה הראשונה שלי עם ״הדקלאים״, קואופרטיב תמרים ישראלי שעושה חיל בעולם, חשבתי לעצמי: למה תמרים צריכים ניימינג?!",
   "אבל ככל שהשיחה התקדמה, הבנתי שהשאיפה שלהם גדולה הרבה יותר מבחירת שם. הם רצו להיכנס לשוק האירופי עם מותג חדש של תמרי מג'הול מובחרים, ולשנות את האופן שבו אנשים תופסים את הפרי הזה.",
@@ -363,42 +283,6 @@ const MYJOOL_PARAGRAPHS = [
   "וככה, מהפרי של סבתא נולד מותג צעיר וצבעוני, שהגיע גם למדפי Waitrose בלונדון.",
 ];
 
-function MyjoolGallery({ isMobile }: { isMobile: boolean }) {
-  const pad = hPad(isMobile);
-  const gap = 12;
-  const rows: string[][] = [];
-  for (let i = 0; i < MYJOOL_IMAGES.length; i += 2) {
-    rows.push(MYJOOL_IMAGES.slice(i, i + 2));
-  }
-
-  return (
-    <section style={{ padding: isMobile ? `0 0 0` : `0 ${pad}px 0` }}>
-      <div style={{ display: "flex", flexDirection: "column", gap }}>
-        {isMobile ? (
-          MYJOOL_IMAGES.map((src, i) => (
-            <img key={i} src={src} alt={`MYJOOL ${i + 1}`} style={{ width: "100%", display: "block", height: "auto" }} />
-          ))
-        ) : (
-          rows.map((row, i) => (
-            <div key={i} style={{
-              display: "grid",
-              gridTemplateColumns: row.length === 2 ? "1fr 1fr" : "1fr",
-              gap,
-            }}>
-              {row.map((src, j) => (
-                <img key={j} src={src} alt={`MYJOOL ${i * 2 + j + 1}`} style={{ width: "100%", display: "block", height: "auto" }} />
-              ))}
-            </div>
-          ))
-        )}
-      </div>
-    </section>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// CASE #2 — Déesse
-// ═══════════════════════════════════════════════════════════════════
 const DEESSE_PARAGRAPHS = [
   "מורן יהב גדלה לתוך עולם היהלומים. כנכדה לסב יהלומן, האהבה לתכשיטים מלווה אותה עוד מילדות, והיום היא מעצבת תכשיטי יוקרה מזהב, יהלומים ואבני חן, עם סגנון אישי שלא מנסה לרדוף אחרי טרנדים.",
   "כשהיא פנתה אליי, מותג התכשיטים שלה, Ne Pas Toucher, עמד בפני ריברנדינג. המטרה הייתה ליצור זהות חדשה שתשדר יוקרה בינלאומית, תפנה לנשים שמעריכות קלאסיקות שנשארות לנצח, ותוכל ללוות את המותג גם בהתרחבות שלו לקטגוריות נוספות, בהן בישום.",
@@ -411,57 +295,6 @@ const DEESSE_PARAGRAPHS = [
   "אחרי שהשם התיישב במקומו, נולד גם הטאגליין: Timeless Fine Jewelry. כי התכשיטים של מורן לא נועדו להיות הטרנד הבא. הם נועדו להישאר. תכשיטי זהב ויהלומים שילוו אותך שנים, ואולי אפילו יעברו לדור הבא.",
 ];
 
-function DeesseGallery({ isMobile }: { isMobile: boolean }) {
-  const pad = hPad(isMobile);
-  const gap = 24;
-
-  const img1 = "/naming/deesse/Deesse-01.png";
-  const vid2 = "/naming/deesse/Deesse-02.mp4";
-  const img3 = "/naming/deesse/Deesse-03.png";
-  const vid4 = "/naming/deesse/Deesse-04.mp4";
-  const img5 = "/naming/deesse/Deesse-05.png";
-
-  return (
-    <section style={{ padding: isMobile ? `0 0 0` : `0 ${pad}px 0` }}>
-      <div style={{ display: "flex", flexDirection: "column", gap }}>
-
-        {/* Row 1: img1 (62%) + vid2 (38%) — RTL: first child = right */}
-        {isMobile ? (
-          <div style={{ display: "flex", flexDirection: "column", gap }}>
-            <img src={img1} alt="Déesse necklace" style={{ width: "100%", display: "block", height: "auto" }} />
-            <GalleryVideo src={vid2} />
-          </div>
-        ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "62fr 38fr", gap, alignItems: "stretch" }}>
-            <img src={img1} alt="Déesse necklace" style={{ width: "100%", display: "block", height: "auto" }} />
-            <GalleryVideo src={vid2} />
-          </div>
-        )}
-
-        {/* Row 2: full-width */}
-        <img src={img3} alt="Déesse ring with ribbon" style={{ width: "100%", display: "block", height: "auto" }} />
-
-        {/* Row 3: vid4 (38%) + img5 (62%) — RTL: first child = right */}
-        {isMobile ? (
-          <div style={{ display: "flex", flexDirection: "column", gap }}>
-            <img src={img5} alt="Déesse ring on pattern" style={{ width: "100%", display: "block", height: "auto" }} />
-            <GalleryVideo src={vid4} />
-          </div>
-        ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "38fr 62fr", gap, alignItems: "stretch" }}>
-            <GalleryVideo src={vid4} />
-            <img src={img5} alt="Déesse ring on pattern" style={{ width: "100%", display: "block", height: "auto" }} />
-          </div>
-        )}
-
-      </div>
-    </section>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// CASE #3 — Rêverie
-// ═══════════════════════════════════════════════════════════════════
 const REVERIE_PARAGRAPHS = [
   "ריקי דדיה היא לא עוד שוקולטיירית. הפרלינים שלה נראים כמו יצירות אמנות קטנות, עם צבעוניות נועזת, צורות וטקסטורות מיוחדות, והכול בעבודת יד מחומרי גלם מובחרים.",
   "אבל בזמן שהשוקולד שלה כבר שידר פרימיום בינלאומי, השם שליווה את המותג, ״ריקולטה״, כבר לא הרגיש לה נכון. ריקי רצתה שם חדש, כזה שיצליח לבטא את היצירתיות, האיכות והאישיות שלה, וגם יוכל לגדול יחד עם המותג.",
@@ -472,117 +305,6 @@ const REVERIE_PARAGRAPHS = [
   "כי לפעמים כל מה שצריך כדי לברוח קצת מהמציאות זה פרלין אחד טוב.",
 ];
 
-function ReverieGallery({ isMobile }: { isMobile: boolean }) {
-  const pad = hPad(isMobile);
-  const gap = 12;
-  const afterImages = [
-    "/naming/reverie/Reverie-01.jpg",
-    "/naming/reverie/Reverie-02.jpg",
-    "/naming/reverie/Reverie-03.jpg",
-    "/naming/reverie/Reverie-04.jpg",
-    "/naming/reverie/Reverie-05.jpg",
-    "/naming/reverie/Reverie-06.jpg",
-  ];
-
-  return (
-    <section style={{ padding: isMobile ? `0 0 0` : `0 ${pad}px 0` }}>
-      <div style={{ display: "flex", flexDirection: "column", gap }}>
-
-        {/* Before / After pair */}
-        {isMobile ? (
-          <div style={{ display: "flex", flexDirection: "column", gap }}>
-            {/* לפני — top on mobile */}
-            <div style={{ position: "relative" }}>
-              <img
-                src="/naming/reverie/before picture.jpg"
-                alt="לפני — ריקולטה"
-                style={{ width: "100%", display: "block", height: "auto" }}
-              />
-              <div style={{
-                position: "absolute", bottom: 10, right: 12,
-                fontFamily: HE, fontWeight: 700, fontSize: 12,
-                color: "rgba(255,255,255,0.9)",
-                background: "rgba(0,0,0,0.35)", padding: "3px 9px", borderRadius: 4,
-              }}>
-                לפני
-              </div>
-            </div>
-            {/* אחרי — below on mobile */}
-            <div style={{ position: "relative" }}>
-              <img
-                src="/naming/reverie/Reverie-01.jpg"
-                alt="אחרי — Rêverie"
-                style={{ width: "100%", display: "block", height: "auto" }}
-              />
-              <div style={{
-                position: "absolute", bottom: 10, right: 12,
-                fontFamily: HE, fontWeight: 700, fontSize: 12,
-                color: "rgba(255,255,255,0.9)",
-                background: "rgba(0,0,0,0.35)", padding: "3px 9px", borderRadius: 4,
-              }}>
-                אחרי
-              </div>
-            </div>
-          </div>
-        ) : (
-          /* Desktop: לפני right, אחרי left (RTL) */
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap }}>
-            <div style={{ position: "relative" }}>
-              <img
-                src="/naming/reverie/before picture.jpg"
-                alt="לפני — ריקולטה"
-                style={{ width: "100%", display: "block", height: "auto" }}
-              />
-              <div style={{
-                position: "absolute", bottom: 14, right: 16,
-                fontFamily: HE, fontWeight: 700, fontSize: 13,
-                color: "rgba(255,255,255,0.9)",
-                background: "rgba(0,0,0,0.35)", padding: "4px 12px", borderRadius: 4,
-              }}>
-                לפני
-              </div>
-            </div>
-            <div style={{ position: "relative" }}>
-              <img
-                src="/naming/reverie/Reverie-01.jpg"
-                alt="אחרי — Rêverie"
-                style={{ width: "100%", display: "block", height: "auto" }}
-              />
-              <div style={{
-                position: "absolute", bottom: 14, right: 16,
-                fontFamily: HE, fontWeight: 700, fontSize: 13,
-                color: "rgba(255,255,255,0.9)",
-                background: "rgba(0,0,0,0.35)", padding: "4px 12px", borderRadius: 4,
-              }}>
-                אחרי
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Additional Reverie images — 2-column grid */}
-        {isMobile ? (
-          afterImages.slice(1).map((src, i) => (
-            <img key={i} src={src} alt={`Rêverie ${i + 2}`} style={{ width: "100%", display: "block", height: "auto" }} />
-          ))
-        ) : (
-          [afterImages.slice(1, 3), afterImages.slice(3, 5), afterImages.slice(5)].map((row, i) => (
-            <div key={i} style={{ display: "grid", gridTemplateColumns: row.length === 2 ? "1fr 1fr" : "1fr", gap }}>
-              {row.map((src, j) => (
-                <img key={j} src={src} alt={`Rêverie ${i * 2 + j + 2}`} style={{ width: "100%", display: "block", height: "auto" }} />
-              ))}
-            </div>
-          ))
-        )}
-
-      </div>
-    </section>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// ABOUT SECTION
-// ═══════════════════════════════════════════════════════════════════
 const ABOUT_PARAGRAPHS = [
   "את הדרך המקצועית שלי התחלתי בעיתונות. שם למדתי לקרוא ערימה של חומר ולזהות את הפרט הקטן ששווה להתעכב עליו, לשאול עוד שאלה ולפעמים לגלות שהתשובה משנה את כל הסיפור. גם היום, לפני שאני חושבת איך לנסח משהו, אני רוצה להבין מה באמת יש פה להגיד.",
   "מאז 2017 אני מלווה מותגים בתהליכי מחקר, בידול, מיצוב ובניית זהות מילולית. אני אוהבת להכיר את האנשים שמאחורי המותג, להבין למה הם בחרו לעשות דברים בדרך שלהם ולגלות מה מכל זה יגרום למישהו לבחור דווקא בהם.",
@@ -591,202 +313,167 @@ const ABOUT_PARAGRAPHS = [
 
 const ABOUT_CLOSING = "שם הוא המילה הראשונה בסיפור של המותג. תוודאו שהיא מספרת אותו כמו שצריך.";
 
-function AboutSection({ isMobile }: { isMobile: boolean }) {
-  const pad = hPad(isMobile);
-  return (
-    <section style={{ padding: isMobile ? `${CASE_GAP(isMobile)}px ${pad}px 0` : `${CASE_GAP(isMobile)}px ${pad}px 0` }}>
-      <div style={{ borderTop: `1px solid ${C.line}`, paddingTop: isMobile ? 48 : 72 }}>
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-        >
-          {/* Layout: text right, photo area left (desktop) or stacked (mobile) */}
-          <div style={{
-            display: isMobile ? "flex" : "grid",
-            flexDirection: isMobile ? "column" : undefined,
-            gridTemplateColumns: isMobile ? undefined : "1fr 400px",
-            gap: isMobile ? 32 : 64,
-            alignItems: "flex-start",
-          }}>
-            {/* Text */}
-            <div style={{ textAlign: "right" }}>
-              <h2 style={{
-                fontFamily: HE,
-                fontWeight: 700,
-                fontSize: isMobile ? 20 : "clamp(22px, 2vw, 28px)",
-                color: C.ink,
-                margin: "0 0 8px",
-                letterSpacing: "-0.015em",
-              }}>
-                נעים מאוד
-              </h2>
-              <p style={{ fontFamily: HE, fontWeight: 400, fontSize: isMobile ? 13 : 14, color: C.ink3, margin: "0 0 32px" }}>
-                אילונה אברמסון, אסטרטגית מותג וזהות מילולית
-              </p>
-
-              {ABOUT_PARAGRAPHS.map((para, i) => (
-                <p key={i} style={{
-                  fontFamily: HE,
-                  fontWeight: 400,
-                  fontSize: isMobile ? 15 : 16,
-                  lineHeight: 1.85,
-                  color: C.ink2,
-                  margin: "0 0 14px",
-                }}>
-                  {para}
-                </p>
-              ))}
-
-              <p style={{
-                fontFamily: HE,
-                fontWeight: 700,
-                fontSize: isMobile ? 16 : 18,
-                lineHeight: 1.65,
-                color: C.ink,
-                margin: "24px 0 0",
-              }}>
-                {ABOUT_CLOSING}
-              </p>
-            </div>
-
-            {/* Photo placeholder — replace src when photo is ready */}
-            <div style={{
-              width: "100%",
-              aspectRatio: "3/4",
-              background: C.lilac,
-              borderRadius: 4,
-              overflow: "hidden",
-              flexShrink: 0,
-            }}>
-              <img src="/naming/about-photo.jpg" alt="אילונה אברמסון" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-            </div>
-          </div>
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
 // ═══════════════════════════════════════════════════════════════════
-// THANK YOU SECTION
+// SECTION 1 — Lilac cover
 // ═══════════════════════════════════════════════════════════════════
-function ThankYouSection({ isMobile }: { isMobile: boolean }) {
-  const pad = hPad(isMobile);
-  const contacts = [
-    {
-      label: "LinkedIn",
-      display: "LinkedIn",
-      href: "https://www.linkedin.com/in/ilona-sammy-abramson/",
-    },
-    {
-      label: "טלפון",
-      display: "053-277-7569",
-      href: "tel:+972532777569",
-    },
-    {
-      label: "מייל",
-      display: "abramsonilona@gmail.com",
-      href: "mailto:abramsonilona@gmail.com",
-    },
-  ];
-
+function HeroSection({ isMobile }: { isMobile: boolean }) {
   return (
-    <section style={{
-      padding: isMobile
-        ? `${CASE_GAP(isMobile)}px ${pad}px ${isMobile ? 64 : 96}px`
-        : `${CASE_GAP(isMobile)}px ${pad}px 96px`,
-      textAlign: "center",
-    }}>
+    <section aria-labelledby="naming-title" style={{ background: C.lilac, marginTop: isMobile ? 47 : 53 }}>
       <motion.div
-        initial={{ opacity: 0, y: 14 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-60px" }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: EASE }}
+        style={{
+          display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center",
+          padding: isMobile ? "56px 40px 52px" : `clamp(64px, 6.5vw, 112px) ${SIDE}`,
+        }}
       >
-        <h2 style={{
-          fontFamily: EN,
-          fontWeight: 300,
-          fontSize: isMobile ? "clamp(40px, 14vw, 70px)" : "clamp(60px, 8vw, 110px)",
-          letterSpacing: "-0.02em",
-          color: C.ink,
-          margin: "0 0 48px",
-          lineHeight: 1,
+        {/* Logo + tagline as one unit — keep the file's ratio */}
+        <img
+          src="/naming/logo-tagline.svg"
+          alt="Ilona Abramson — Brand & Verbal Strategist"
+          width={566}
+          height={317}
+          style={{
+            display: "block",
+            width: isMobile ? "min(290px, 100%)" : "clamp(280px, 28vw, 500px)",
+            height: "auto",
+            aspectRatio: "565.95 / 317.13",
+          }}
+        />
+        <h1 id="naming-title" lang="en" dir="ltr" style={{
+          margin: isMobile ? "32px 0 0" : "clamp(36px, 3vw, 52px) 0 0",
+          fontFamily: EN, fontWeight: 300,
+          fontSize: isMobile ? 16 : "clamp(18px, 1.35vw, 24px)",
+          lineHeight: 1, letterSpacing: "0.34em", marginRight: "-0.34em",
+          color: C.forest,
         }}>
-          THANK YOU
-        </h2>
-
-        <div style={{
-          display: "flex",
-          flexDirection: isMobile ? "column" : "row",
-          gap: isMobile ? 20 : 48,
-          justifyContent: "center",
-          alignItems: "center",
-        }}>
-          {contacts.map(({ label, display, href }) => (
-            <a
-              key={label}
-              href={href}
-              target={href.startsWith("http") ? "_blank" : undefined}
-              rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-              style={{
-                fontFamily: href.startsWith("http") || href.startsWith("mailto") ? EN : HE,
-                fontWeight: 300,
-                fontSize: isMobile ? 15 : 16,
-                color: C.ink,
-                textDecoration: "none",
-                borderBottom: `1px solid ${C.line}`,
-                paddingBottom: 3,
-                letterSpacing: href.startsWith("tel") ? "0.03em" : "0",
-                direction: href.startsWith("tel") ? "ltr" : "inherit",
-                display: "inline-block",
-                transition: "color 0.2s, border-color 0.2s",
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLAnchorElement).style.color = C.violet;
-                (e.currentTarget as HTMLAnchorElement).style.borderColor = C.violet;
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLAnchorElement).style.color = C.ink;
-                (e.currentTarget as HTMLAnchorElement).style.borderColor = C.line;
-              }}
-            >
-              {display}
-            </a>
-          ))}
-        </div>
+          NAMING
+        </h1>
       </motion.div>
     </section>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// MAIN
+// SECTION 2 — Process
 // ═══════════════════════════════════════════════════════════════════
-export default function NamingClient() {
-  const isMobile = useIsMobile();
-  const pad = hPad(isMobile);
-  const caseGap = CASE_GAP(isMobile);
-
+function ProcessSection({ isMobile }: { isMobile: boolean }) {
   return (
-    <div style={{ background: C.cream, color: C.ink, direction: "rtl" }}>
+    <Wrap style={{ paddingTop: isMobile ? 56 : "clamp(72px, 6.5vw, 120px)" }}>
+      <section aria-labelledby="naming-process">
+        <h2 id="naming-process" style={sectionHeading(isMobile)}>תהליך הניימינג</h2>
+        <ol style={{ listStyle: "none", margin: isMobile ? "36px 0 0" : "clamp(36px, 3.4vw, 56px) 0 0", padding: 0, borderBottom: `1px solid ${C.rule}` }}>
+          {PROCESS_STEPS.map(({ num, title, body }) => (
+            <li key={num} style={{
+              display: "grid",
+              gridTemplateColumns: isMobile ? "1fr" : "88px minmax(0, 300px) minmax(0, 620px)",
+              columnGap: "clamp(24px, 3vw, 56px)",
+              rowGap: 8,
+              alignItems: "baseline",
+              padding: isMobile ? "22px 0" : "28px 0",
+              borderTop: `1px solid ${C.rule}`,
+              textAlign: "right",
+            }}>
+              <span style={{ fontFamily: EN, fontWeight: 300, fontSize: 16, lineHeight: 1, letterSpacing: "0.04em", color: C.muted }}>{num}</span>
+              <h3 style={{ margin: 0, fontFamily: HE, fontWeight: 700, fontSize: isMobile ? 19 : 20, lineHeight: 1.3, color: C.ink }}>{title}</h3>
+              <p style={{ margin: 0, fontFamily: HE, fontWeight: 400, fontSize: isMobile ? 16 : 17, lineHeight: 1.7, color: C.body }}>{body}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+    </Wrap>
+  );
+}
 
-      {/* 1. Hero */}
-      <HeroSection isMobile={isMobile} />
+// ═══════════════════════════════════════════════════════════════════
+// GALLERIES
+// ═══════════════════════════════════════════════════════════════════
+const MY = "/naming/Myjool/";
+const myjool = {
+  m1: { kind: "img", src: MY + "511197033_10163047046733485_4456798310964133825_n.jpg", alt: "MYJOOL 1", w: 1080, h: 1080 },
+  m2: { kind: "img", src: MY + "512064747_10162661104254920_2510028380173325386_n.jpg", alt: "MYJOOL 2", w: 2048, h: 1536 },
+  m3: { kind: "img", src: MY + "512587925_10162661104059920_4341441496912268612_n.jpg", alt: "MYJOOL 3", w: 1536, h: 2048 },
+  m4: { kind: "img", src: MY + "513933162_10162661104264920_5119242861589211427_n.jpg", alt: "MYJOOL 4", w: 1536, h: 2048 },
+  m5: { kind: "img", src: MY + "WhatsApp Image 2023-02-24 at 09.27.57 (1).jpeg", alt: "MYJOOL 5", w: 1080, h: 1080 },
+  m6: { kind: "img", src: MY + "WhatsApp Image 2023-02-24 at 09.27.57 (3).jpeg", alt: "MYJOOL 6", w: 1080, h: 1080 },
+  m7: { kind: "img", src: MY + "WhatsApp Image 2023-02-24 at 09.27.57 (4).jpeg", alt: "MYJOOL 7", w: 1080, h: 1080 },
+} satisfies Record<string, Media>;
 
-      {/* 2. Process */}
-      <ProcessSection isMobile={isMobile} />
+function MyjoolGallery({ isMobile }: { isMobile: boolean }) {
+  return (
+    <Gallery isMobile={isMobile}>
+      <MediaRow isMobile={isMobile} items={[myjool.m2, myjool.m3, myjool.m4]} />
+      <MediaRow isMobile={isMobile} twoUpOnMobile items={[myjool.m1, myjool.m5, myjool.m6, myjool.m7]} />
+    </Gallery>
+  );
+}
 
-      {/* Case separator */}
-      <div style={{ height: caseGap }} />
+const DE = "/naming/deesse/";
+const deesse = {
+  i1: { kind: "img", src: DE + "Deesse-01.png", alt: "Déesse necklace", w: 1222, h: 1317 },
+  v2: { kind: "video", src: DE + "Deesse-02.mp4", poster: DE + "Deesse-02-poster.jpg", label: "סרטון Déesse", w: 576, h: 1024 },
+  i3: { kind: "img", src: DE + "Deesse-03.png", alt: "Déesse ring with ribbon", w: 2000, h: 1239 },
+  v4: { kind: "video", src: DE + "Deesse-04.mp4", poster: DE + "Deesse-04-poster.jpg", label: "סרטון Déesse", w: 480, h: 848 },
+  i5: { kind: "img", src: DE + "Deesse-05.png", alt: "Déesse ring on pattern", w: 1222, h: 1317 },
+} satisfies Record<string, Media>;
 
-      {/* 3. MYJOOL */}
-      <div style={{ maxWidth: 1280 + pad * 2, margin: "0 auto" }}>
+function DeesseGallery({ isMobile }: { isMobile: boolean }) {
+  // RTL: first item sits on the right
+  return (
+    <Gallery isMobile={isMobile}>
+      <MediaRow isMobile={isMobile} items={[deesse.v2, deesse.i1]} />
+      <MediaRow isMobile={isMobile} items={[deesse.i3]} />
+      <MediaRow isMobile={isMobile} items={[deesse.i5, deesse.v4]} />
+    </Gallery>
+  );
+}
+
+const RE = "/naming/reverie/";
+const reverie = {
+  before: { kind: "img", src: RE + "before picture.jpg", alt: "לפני — ריקולטה", w: 7594, h: 5063 },
+  r1: { kind: "img", src: RE + "Reverie-01.jpg", alt: "אחרי — Rêverie", w: 1222, h: 1523 },
+  r2: { kind: "img", src: RE + "Reverie-02.jpg", alt: "Rêverie 2", w: 1222, h: 1523 },
+  r3: { kind: "img", src: RE + "Reverie-03.jpg", alt: "Rêverie 3", w: 1222, h: 1523 },
+  r4: { kind: "img", src: RE + "Reverie-04.jpg", alt: "Rêverie 4", w: 1222, h: 1523 },
+  r5: { kind: "img", src: RE + "Reverie-05.jpg", alt: "Rêverie 5", w: 1222, h: 1523 },
+  r6: { kind: "img", src: RE + "Reverie-06.jpg", alt: "Rêverie 6", w: 1222, h: 1523 },
+} satisfies Record<string, Media>;
+
+function ReverieGallery({ isMobile }: { isMobile: boolean }) {
+  const gap = galleryGap(isMobile);
+  return (
+    <Gallery isMobile={isMobile}>
+      {/* לפני right / אחרי left on desktop; לפני above אחרי on mobile */}
+      <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap }}>
+        <LabeledCell label="לפני" item={reverie.before} isMobile={isMobile} />
+        <LabeledCell label="אחרי" item={reverie.r1} isMobile={isMobile} />
+      </div>
+      <MediaRow isMobile={isMobile} items={[reverie.r2, reverie.r3]} />
+      <MediaRow isMobile={isMobile} items={[reverie.r4, reverie.r5, reverie.r6]} />
+    </Gallery>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// SECTION 3 — Case Studies
+// ═══════════════════════════════════════════════════════════════════
+function CaseStudies({ isMobile }: { isMobile: boolean }) {
+  return (
+    <Wrap>
+      <section aria-labelledby="naming-cases">
+        <div style={{ marginTop: isMobile ? 96 : "clamp(120px, 11vw, 208px)" }}>
+          <h2 id="naming-cases" lang="en" style={{
+            ...sectionHeading(isMobile, true),
+            paddingBottom: isMobile ? 20 : "clamp(20px, 1.8vw, 32px)",
+            borderBottom: `2px solid ${C.ink}`,
+          }}>
+            Case Studies
+          </h2>
+        </div>
+
         <CaseSection
-          number="#1"
-          title="MYJOOL"
-          titleEn
+          id="case-myjool" number="#1" title="MYJOOL" lang="en"
           category="ניימינג | טאגליין"
           heading="מהמזווה של סבתא למדפי Waitrose בלונדון"
           paragraphs={MYJOOL_PARAGRAPHS}
@@ -794,16 +481,11 @@ export default function NamingClient() {
         >
           <MyjoolGallery isMobile={isMobile} />
         </CaseSection>
-      </div>
 
-      <CaseDivider isMobile={isMobile} />
+        <CaseRule isMobile={isMobile} />
 
-      {/* 4. Déesse */}
-      <div style={{ maxWidth: 1280 + pad * 2, margin: "0 auto" }}>
         <CaseSection
-          number="#2"
-          title="Déesse"
-          titleEn
+          id="case-deesse" number="#2" title="Déesse" lang="fr"
           category="ניימינג | טאגליין"
           heading="השם שברא את עצמו"
           paragraphs={DEESSE_PARAGRAPHS}
@@ -812,16 +494,11 @@ export default function NamingClient() {
         >
           <DeesseGallery isMobile={isMobile} />
         </CaseSection>
-      </div>
 
-      <CaseDivider isMobile={isMobile} />
+        <CaseRule isMobile={isMobile} />
 
-      {/* 5. Rêverie */}
-      <div style={{ maxWidth: 1280 + pad * 2, margin: "0 auto" }}>
         <CaseSection
-          number="#3"
-          title="Rêverie"
-          titleEn
+          id="case-reverie" number="#3" title="Rêverie" lang="fr"
           category="ניימינג | טאגליין"
           heading="לגרום לכם לחלום על השוקולד הזה"
           paragraphs={REVERIE_PARAGRAPHS}
@@ -830,17 +507,115 @@ export default function NamingClient() {
         >
           <ReverieGallery isMobile={isMobile} />
         </CaseSection>
-      </div>
+      </section>
+    </Wrap>
+  );
+}
 
-      {/* 6. About */}
-      <div style={{ maxWidth: 1280 + pad * 2, margin: "0 auto" }}>
-        <AboutSection isMobile={isMobile} />
-      </div>
+// ═══════════════════════════════════════════════════════════════════
+// SECTION 4 — About
+// ═══════════════════════════════════════════════════════════════════
+function AboutSection({ isMobile }: { isMobile: boolean }) {
+  return (
+    <Wrap>
+      <section aria-labelledby="naming-about" style={{
+        marginTop: isMobile ? 96 : "clamp(120px, 11vw, 208px)",
+        paddingTop: isMobile ? 40 : "clamp(48px, 4.2vw, 80px)",
+        borderTop: `1px solid ${C.caseRule}`,
+        display: "grid",
+        gridTemplateColumns: isMobile ? "1fr" : "minmax(0, 7fr) minmax(0, 5fr)",
+        gap: isMobile ? 36 : "clamp(40px, 6vw, 120px)",
+        alignItems: "center",
+      }}>
+        <div style={{ maxWidth: 640, textAlign: "right" }}>
+          <h2 id="naming-about" style={sectionHeading(isMobile)}>נעים מאוד</h2>
+          <p style={{ fontFamily: HE, fontWeight: 400, fontSize: 17, lineHeight: 1.5, color: C.muted, margin: "14px 0 36px" }}>
+            אילונה אברמסון, אסטרטגית מותג וזהות מילולית
+          </p>
+          {ABOUT_PARAGRAPHS.map((t, i) => (
+            <p key={i} style={{ fontFamily: HE, fontWeight: 400, fontSize: isMobile ? 16 : 17, lineHeight: 1.75, color: C.body, margin: "0 0 1.05em" }}>{t}</p>
+          ))}
+          <p style={{ fontFamily: HE, fontWeight: 700, fontSize: 20, lineHeight: 1.5, color: C.ink, margin: "32px 0 0" }}>
+            {ABOUT_CLOSING}
+          </p>
+        </div>
+        <figure style={{
+          margin: 0, justifySelf: "start", width: "100%", maxWidth: isMobile ? "none" : 520,
+          aspectRatio: "848 / 1131", position: "relative", background: C.media,
+        }}>
+          <img src="/naming/about-photo.jpg" alt="אילונה אברמסון" width={848} height={1131} loading="lazy"
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+        </figure>
+      </section>
+    </Wrap>
+  );
+}
 
-      {/* 7. Thank you */}
+// ═══════════════════════════════════════════════════════════════════
+// SECTION 5 — Thank you
+// ═══════════════════════════════════════════════════════════════════
+const CONTACTS = [
+  { display: "LinkedIn", href: "https://www.linkedin.com/in/ilona-sammy-abramson/" },
+  { display: "053-277-7569", href: "tel:+972532777569" },
+  { display: "abramsonilona@gmail.com", href: "mailto:abramsonilona@gmail.com" },
+];
+
+function ThankYouSection({ isMobile }: { isMobile: boolean }) {
+  return (
+    <Wrap>
+      <section aria-labelledby="naming-thanks" style={{
+        textAlign: "center",
+        padding: isMobile ? "96px 0 72px" : "clamp(120px, 10vw, 192px) 0 clamp(80px, 7vw, 128px)",
+      }}>
+        <h2 id="naming-thanks" lang="en" style={{
+          margin: 0, fontFamily: EN, fontWeight: 300,
+          fontSize: isMobile ? 44 : "clamp(44px, 5.4vw, 104px)",
+          lineHeight: 1, letterSpacing: "-0.03em", color: C.ink,
+        }}>
+          THANK YOU
+        </h2>
+        <ul dir="ltr" style={{
+          listStyle: "none", padding: 0, margin: isMobile ? "32px 0 0" : "clamp(32px, 3vw, 48px) 0 0",
+          display: "flex", flexDirection: isMobile ? "column" : "row", flexWrap: "wrap",
+          justifyContent: "center", alignItems: "center", gap: isMobile ? 14 : "12px 48px",
+          fontFamily: EN, fontWeight: 300, fontSize: 18, lineHeight: 1.4,
+        }}>
+          {CONTACTS.map(({ display, href }) => {
+            const ext = href.startsWith("http");
+            return (
+              <li key={href}>
+                <a
+                  href={href}
+                  target={ext ? "_blank" : undefined}
+                  rel={ext ? "noopener noreferrer" : undefined}
+                  className="naming-link"
+                  style={{ color: C.ink, textDecoration: "underline", textDecorationThickness: 1, textUnderlineOffset: 4 }}
+                >
+                  {display}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    </Wrap>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MAIN
+// ═══════════════════════════════════════════════════════════════════
+export default function NamingClient() {
+  const isMobile = useIsMobile(761);
+
+  return (
+    <div style={{ background: C.cream, color: C.ink, direction: "rtl", overflowX: "clip" }}>
+      <style>{`.naming-link:hover{color:${C.violet} !important;text-decoration-thickness:2px !important}`}</style>
+      <HeroSection isMobile={isMobile} />
+      <ProcessSection isMobile={isMobile} />
+      <CaseStudies isMobile={isMobile} />
+      <AboutSection isMobile={isMobile} />
       <ThankYouSection isMobile={isMobile} />
-
-      {/* Footer */}
       <ProjectFooter />
     </div>
   );
