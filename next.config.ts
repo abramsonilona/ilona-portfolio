@@ -11,6 +11,18 @@ const nextConfig: NextConfig = {
 
   // Strict mode
   reactStrictMode: true,
+
+  // Temporary (307) redirect: the bare domain and www open the naming page.
+  // Only applies on these hosts, so the *.vercel.app addresses keep the homepage.
+  // To bring the homepage back on the domain, delete this block.
+  async redirects() {
+    return ["ilona-abramson.com", "www.ilona-abramson.com"].map((host) => ({
+      source: "/",
+      has: [{ type: "host" as const, value: host }],
+      destination: "/naming",
+      permanent: false,
+    }));
+  },
 };
 
 export default nextConfig;
