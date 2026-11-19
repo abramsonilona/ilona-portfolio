@@ -334,6 +334,23 @@ const ABOUT_PARAGRAPHS = [
 
 const ABOUT_CLOSING = "שם הוא המילה הראשונה בסיפור של המותג. תוודאו שהיא מספרת אותו כמו שצריך.";
 
+// ─── Fixed top bar: logo pinned to the top-left corner ─────────────
+// (the site navigation is hidden on /naming; same height as the nav)
+function TopBar({ isMobile }: { isMobile: boolean }) {
+  return (
+    <header style={{
+      position: "fixed", top: 0, right: 0, left: 0, zIndex: 100,
+      height: isMobile ? 47 : 53, boxSizing: "border-box",
+      padding: isMobile ? "0 1.25rem" : "0 2.5rem",
+      display: "flex", alignItems: "center", justifyContent: "flex-end", // RTL: end = left
+      background: "rgba(252,247,244,0.97)", borderBottom: "1px solid var(--rule)",
+    }}>
+      <img src="/logo.png.png" alt="Ilona Abramson" width={2712} height={164}
+        style={{ height: 18, width: "auto", display: "block", objectFit: "contain" }} />
+    </header>
+  );
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // SECTION 1 — Lilac cover
 // ═══════════════════════════════════════════════════════════════════
@@ -390,18 +407,20 @@ function OpeningSection({ isMobile }: { isMobile: boolean }) {
   return (
     <Wrap>
       <section aria-labelledby="naming-opening" style={{
-        textAlign: "right",
+        textAlign: "center",
         padding: isMobile ? "56px 0 0" : "clamp(72px, 6.4vw, 120px) 0 0",
       }}>
         <h2 id="naming-opening" lang="en" dir="ltr" style={{
-          margin: 0, textAlign: "right",
-          fontFamily: EN, fontWeight: 300,
-          fontSize: isMobile ? 26 : "clamp(28px, 2.6vw, 44px)",
-          lineHeight: 1.15, letterSpacing: "-0.02em", color: C.ink, textWrap: "balance",
+          margin: 0, textAlign: "center",
+          fontFamily: NAMING_SERIF, fontStyle: "italic", fontWeight: 300,
+          fontSize: isMobile ? "min(26px, calc((100vw - 48px) / 17.6))" : "clamp(30px, 2.8vw, 48px)",
+          lineHeight: 1.2, letterSpacing: "-0.005em", color: C.ink,
         }}>
-          Before I look for a name, I look for what makes the brand worth naming.
+          {/* Two fixed lines; on mobile the size scales so line 2 fits the screen */}
+          <span style={{ display: "block", whiteSpace: "nowrap" }}>Before I look for a name,</span>
+          <span style={{ display: "block", whiteSpace: "nowrap" }}>I look for what makes the brand worth naming.</span>
         </h2>
-        <div style={{ maxWidth: 720, marginTop: isMobile ? 24 : "clamp(24px, 2.2vw, 36px)" }}>
+        <div style={{ maxWidth: 720, margin: "0 auto", marginTop: isMobile ? 24 : "clamp(24px, 2.2vw, 36px)", textAlign: "center" }}>
           {OPENING_PARAGRAPHS.map((t, i) => (
             <p key={i} style={{
               margin: i === 0 ? 0 : "1em 0 0",
@@ -686,6 +705,7 @@ export default function NamingClient() {
   return (
     <div style={{ background: C.cream, color: C.ink, direction: "rtl", overflowX: "clip" }}>
       <style>{`@font-face{font-family:"NamingEditorNote";src:url("/fonts/Editor_sNote-LightItalic.otf") format("opentype");font-weight:300;font-style:italic;font-display:swap}.naming-link:hover{color:${C.violet} !important;text-decoration-thickness:2px !important}`}</style>
+      <TopBar isMobile={isMobile} />
       <HeroSection isMobile={isMobile} />
       <OpeningSection isMobile={isMobile} />
       <ProcessSection isMobile={isMobile} />
