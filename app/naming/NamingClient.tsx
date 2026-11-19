@@ -58,16 +58,11 @@ type Media =
 
 function Cell({ item, fixedWidth }: { item: Media; fixedWidth?: string }) {
   const ratio = item.w / item.h;
-  return (
-    <div style={{
-      position: "relative",
-      minWidth: 0,
-      overflow: "hidden",
-      background: C.media,
-      aspectRatio: `${item.w} / ${item.h}`,
-      ...(fixedWidth ? { width: fixedWidth, flex: "none" } : { flex: `${ratio} 1 0` }),
-    }}>
-      {item.kind === "img" ? (
+  const sizing: React.CSSProperties = fixedWidth ? { width: fixedWidth, flex: "none" } : { flex: `${ratio} 1 0` };
+  if (item.kind === "img") {
+    // The image sets its own height from its width: never cropped, full length kept.
+    return (
+      <div style={{ minWidth: 0, alignSelf: "flex-start", background: C.media, ...sizing }}>
         <img
           src={item.src}
           alt={item.alt}
@@ -75,16 +70,29 @@ function Cell({ item, fixedWidth }: { item: Media; fixedWidth?: string }) {
           height={item.h}
           loading="lazy"
           decoding="async"
-          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+          style={{ width: "100%", height: "auto", display: "block" }}
         />
-      ) : (
-        <PosterVideo src={item.src} poster={item.poster} label={item.label} />
-      )}
+      </div>
+    );
+  }
+  return (
+    <div style={{
+      position: "relative",
+      minWidth: 0,
+      alignSelf: "flex-start",
+      overflow: "hidden",
+      background: C.media,
+      aspectRatio: `${item.w} / ${item.h}`,
+      ...sizing,
+    }}>
+      <PosterVideo src={item.src} poster={item.poster} label={item.label} />
     </div>
   );
 }
 
 function MediaRow({ items, isMobile }: { items: Media[]; isMobile: boolean }) {
+  // A single item always spans the full width (flex-grow < 1 would leave a gap)
+  if (items.length === 1) return <Cell item={items[0]} fixedWidth="100%" />;
   return <div style={{ display: "flex", gap: galleryGap(isMobile) }}>{items.map((it, i) => <Cell key={i} item={it} />)}</div>;
 }
 
@@ -130,7 +138,7 @@ function PosterVideo({ src, poster, label }: { src: string; poster: string; labe
         playsInline
         controls={started}
         aria-label={label}
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", display: "block" }}
       >
         <source src={src} type="video/mp4" />
       </video>
@@ -180,12 +188,13 @@ interface CaseProps {
   heading: string;
   paragraphs: string[];
   credits?: { label: string; name: string; lang?: "he" | "en" }[];
+  lead: Media; // mobile only: one image right under the brand name
   columns: 2 | 3; // desktop text columns, by text length
   isMobile: boolean;
   children: React.ReactNode; // gallery
 }
 
-function CaseSection({ id, number, title, lang, descriptor, descriptorLang, category, heading, paragraphs, credits, columns, isMobile, children }: CaseProps) {
+function CaseSection({ id, number, title, lang, descriptor, descriptorLang, category, heading, paragraphs, credits, lead, columns, isMobile, children }: CaseProps) {
   const p: React.CSSProperties = {
     fontFamily: HE, fontWeight: 400, fontSize: isMobile ? 15 : 15.5, lineHeight: 1.75,
     color: C.body, margin: "0 0 1em",
@@ -203,8 +212,8 @@ function CaseSection({ id, number, title, lang, descriptor, descriptorLang, cate
         </p>
         <h3 id={id} lang={lang} style={{
           fontFamily: EN, fontWeight: 300,
-          fontSize: isMobile ? 28 : "clamp(28px, 2.4vw, 42px)",
-          lineHeight: 1.05, letterSpacing: "-0.02em", color: C.ink, margin: 0,
+          fontSize: isMobile ? 40 : "clamp(40px, 3.4vw, 60px)",
+          lineHeight: 1.02, letterSpacing: "-0.02em", color: C.ink, margin: 0,
         }}>
           {title}
         </h3>
@@ -225,14 +234,25 @@ function CaseSection({ id, number, title, lang, descriptor, descriptorLang, cate
         </p>
       </motion.div>
 
+      {isMobile && (
+        <div style={{ marginTop: 24 }}>
+          <Cell item={lead} fixedWidth="100%" />
+        </div>
+      )}
+
       <div style={{ marginTop: isMobile ? 28 : "clamp(28px, 2.4vw, 40px)" }}>
         <h4 style={{ fontFamily: HE, fontWeight: 700, fontSize: isMobile ? 17 : 18, lineHeight: 1.4, color: C.ink, margin: "0 0 16px" }}>
           {heading}
         </h4>
         {/* Desktop: text flows across 2 or 3 columns; mobile: one column */}
-        <div style={isMobile ? undefined : { columnCount: columns, columnGap: "clamp(32px, 3.4vw, 56px)", columnFill: "balance" }}>
-          {paragraphs.map((t, i) => <p key={i} style={{ ...p, breakInside: "avoid-column" }}>{t}</p>)}
-        </div>
+        {isMobile ? (
+          // Mobile: the whole story as one continuous block of text
+          <p style={{ ...p, margin: 0 }}>{paragraphs.join(" ")}</p>
+        ) : (
+          <div style={{ columnCount: columns, columnGap: "clamp(32px, 3.4vw, 56px)", columnFill: "balance" }}>
+            {paragraphs.map((t, i) => <p key={i} style={{ ...p, breakInside: "avoid-column" }}>{t}</p>)}
+          </div>
+        )}
         {credits && credits.length > 0 && (
           <div style={{ display: "flex", flexWrap: "wrap", gap: "12px 40px", marginTop: isMobile ? 24 : 20 }}>
             {credits.map(c => (
@@ -350,7 +370,9 @@ function TopBar({ isMobile }: { isMobile: boolean }) {
       height: isMobile ? 47 : 53, boxSizing: "border-box",
       padding: isMobile ? "0 1.25rem" : "0 2.5rem",
       display: "flex", alignItems: "center", justifyContent: "flex-end", // RTL: end = left
-      background: "rgba(252,247,244,0.97)", borderBottom: "1px solid var(--rule)",
+      // Mobile: lilac bar (matches the cover); desktop keeps the cream bar
+      background: isMobile ? C.lilac : "rgba(252,247,244,0.97)",
+      borderBottom: isMobile ? "1px solid rgba(10,26,13,0.08)" : "1px solid var(--rule)",
     }}>
       <img src="/naming/logo-mark.png" alt="Ilona Abramson" width={498} height={128}
         style={{ height: isMobile ? 18 : 20, width: "auto", display: "block", objectFit: "contain" }} />
@@ -499,7 +521,7 @@ function MyjoolGallery({ isMobile }: { isMobile: boolean }) {
     <Gallery
       isMobile={isMobile}
       desktop={[[m.v1, m.m2, m.m3, m.m4], [m.m1, m.m5, m.m6, m.m7]]}
-      mobile={[[m.m2], [m.v1, m.m3], [m.m4, m.m1], [m.m5, m.m6, m.m7]]}
+      mobile={[[m.v1], [m.m2], [m.m3], [m.m4], [m.m5], [m.m6], [m.m7]]} // m1 leads under the name
     />
   );
 }
@@ -519,7 +541,7 @@ function DeesseGallery({ isMobile }: { isMobile: boolean }) {
     <Gallery
       isMobile={isMobile}
       desktop={[[d.v2, d.i1, d.v4], [d.i3, d.i5]]}
-      mobile={[[d.v2, d.v4], [d.i1, d.i5], [d.i3]]}
+      mobile={[[d.v2], [d.i3], [d.i5], [d.v4]]} // i1 leads under the name
     />
   );
 }
@@ -542,7 +564,7 @@ function ReverieGallery({ isMobile }: { isMobile: boolean }) {
     <Gallery
       isMobile={isMobile}
       desktop={[[r.r1, r.r3, r.r4, r.r5, r.r6]]}
-      mobile={[[r.r1, r.r3], [r.r4, r.r5], [r.r6]]}
+      mobile={[[r.r3], [r.r4], [r.r5], [r.r6]]} // r1 leads under the name
     >
       {/* Before (old box) next to the new packaging trio:
           לפני right / אחרי left on desktop; לפני above אחרי on mobile */}
@@ -576,6 +598,7 @@ function CaseStudies({ isMobile }: { isMobile: boolean }) {
           descriptor="מותג תמרים בינלאומי" descriptorLang="he"
           category="ניימינג | טאגליין"
           heading="מהמזווה של סבתא למדפי Waitrose בלונדון"
+          lead={myjool.m1}
           paragraphs={MYJOOL_PARAGRAPHS}
           credits={[
             { label: "מיתוג וקריאייטיב", name: "סטודיו ברוך נאה" },
@@ -594,6 +617,7 @@ function CaseStudies({ isMobile }: { isMobile: boolean }) {
           descriptor="Fine Jewelry" descriptorLang="en"
           category="ניימינג | טאגליין"
           heading="השם שברא את עצמו"
+          lead={deesse.i1}
           paragraphs={DEESSE_PARAGRAPHS}
           columns={3}
           credits={[{ label: "מיתוג ועיצוב", name: "Hadar Mizrahi", lang: "en" }]}
@@ -609,6 +633,7 @@ function CaseStudies({ isMobile }: { isMobile: boolean }) {
           descriptor="Chocolatier" descriptorLang="en"
           category="ניימינג | טאגליין"
           heading="לגרום לכם לחלום על השוקולד הזה"
+          lead={reverie.r1}
           paragraphs={REVERIE_PARAGRAPHS}
           columns={2}
           credits={[{ label: "מיתוג ועיצוב", name: "Hadar Mizrahi", lang: "en" }]}
