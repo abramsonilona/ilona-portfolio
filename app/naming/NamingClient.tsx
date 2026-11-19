@@ -506,9 +506,9 @@ function ProcessSection({ isMobile }: { isMobile: boolean }) {
 const MY = "/naming/Myjool/";
 const myjool = {
   m1: { kind: "img", src: MY + "511197033_10163047046733485_4456798310964133825_n.jpg", alt: "MYJOOL 1", w: 1080, h: 1080 },
-  m2: { kind: "img", src: MY + "512064747_10162661104254920_2510028380173325386_n.jpg", alt: "MYJOOL 2", w: 2048, h: 1536 },
-  m3: { kind: "img", src: MY + "512587925_10162661104059920_4341441496912268612_n.jpg", alt: "MYJOOL 3", w: 1536, h: 2048 },
-  m4: { kind: "img", src: MY + "513933162_10162661104264920_5119242861589211427_n.jpg", alt: "MYJOOL 4", w: 1536, h: 2048 },
+  m2: { kind: "img", src: "/naming/web/myjool-2.jpg", alt: "MYJOOL 2", w: 2048, h: 1536 },
+  m3: { kind: "img", src: "/naming/web/myjool-3.jpg", alt: "MYJOOL 3", w: 1536, h: 2048 },
+  m4: { kind: "img", src: "/naming/web/myjool-4.jpg", alt: "MYJOOL 4", w: 1536, h: 2048 },
   m5: { kind: "img", src: MY + "WhatsApp Image 2023-02-24 at 09.27.57 (1).jpeg", alt: "MYJOOL 5", w: 1080, h: 1080 },
   m6: { kind: "img", src: MY + "WhatsApp Image 2023-02-24 at 09.27.57 (3).jpeg", alt: "MYJOOL 6", w: 1080, h: 1080 },
   m7: { kind: "img", src: MY + "WhatsApp Image 2023-02-24 at 09.27.57 (4).jpeg", alt: "MYJOOL 7", w: 1080, h: 1080 },
@@ -528,11 +528,11 @@ function MyjoolGallery({ isMobile }: { isMobile: boolean }) {
 
 const DE = "/naming/deesse/";
 const deesse = {
-  i1: { kind: "img", src: DE + "Deesse-01.png", alt: "Déesse necklace", w: 1222, h: 1317 },
+  i1: { kind: "img", src: "/naming/web/deesse-01.jpg", alt: "Déesse necklace", w: 1222, h: 1317 },
   v2: { kind: "video", src: DE + "Deesse-02.mp4", poster: DE + "Deesse-02-poster.jpg", label: "סרטון Déesse", w: 576, h: 1024 },
-  i3: { kind: "img", src: DE + "Deesse-03.png", alt: "Déesse ring with ribbon", w: 2000, h: 1239 },
+  i3: { kind: "img", src: "/naming/web/deesse-03.jpg", alt: "Déesse ring with ribbon", w: 2000, h: 1239 },
   v4: { kind: "video", src: DE + "Deesse-04.mp4", poster: DE + "Deesse-04-poster.jpg", label: "סרטון Déesse", w: 480, h: 848 },
-  i5: { kind: "img", src: DE + "Deesse-05.png", alt: "Déesse ring on pattern", w: 1222, h: 1317 },
+  i5: { kind: "img", src: "/naming/web/deesse-05.jpg", alt: "Déesse ring on pattern", w: 1222, h: 1317 },
 } satisfies Record<string, Media>;
 
 function DeesseGallery({ isMobile }: { isMobile: boolean }) {
@@ -546,15 +546,14 @@ function DeesseGallery({ isMobile }: { isMobile: boolean }) {
   );
 }
 
-const RE = "/naming/reverie/";
 const reverie = {
-  before: { kind: "img", src: RE + "before picture.jpg", alt: "לפני: ריקולטה", w: 7594, h: 5063 },
-  r1: { kind: "img", src: RE + "Reverie-01.jpg", alt: "Rêverie 1", w: 1222, h: 1523 },
-  r2: { kind: "img", src: RE + "Reverie-02.jpg", alt: "אחרי: Rêverie", w: 1222, h: 1523 },
-  r3: { kind: "img", src: RE + "Reverie-03.jpg", alt: "Rêverie 3", w: 1222, h: 1523 },
-  r4: { kind: "img", src: RE + "Reverie-04.jpg", alt: "Rêverie 4", w: 1222, h: 1523 },
-  r5: { kind: "img", src: RE + "Reverie-05.jpg", alt: "Rêverie 5", w: 1222, h: 1523 },
-  r6: { kind: "img", src: RE + "Reverie-06.jpg", alt: "Rêverie 6", w: 1222, h: 1523 },
+  before: { kind: "img", src: "/naming/web/reverie-before.jpg", alt: "לפני: ריקולטה", w: 7594, h: 5063 },
+  r1: { kind: "img", src: "/naming/web/reverie-01.jpg", alt: "Rêverie 1", w: 1222, h: 1523 },
+  r2: { kind: "img", src: "/naming/web/reverie-02.jpg", alt: "אחרי: Rêverie", w: 1222, h: 1523 },
+  r3: { kind: "img", src: "/naming/web/reverie-03.jpg", alt: "Rêverie 3", w: 1222, h: 1523 },
+  r4: { kind: "img", src: "/naming/web/reverie-04.jpg", alt: "Rêverie 4", w: 1222, h: 1523 },
+  r5: { kind: "img", src: "/naming/web/reverie-05.jpg", alt: "Rêverie 5", w: 1222, h: 1523 },
+  r6: { kind: "img", src: "/naming/web/reverie-06.jpg", alt: "Rêverie 6", w: 1222, h: 1523 },
 } satisfies Record<string, Media>;
 
 function ReverieGallery({ isMobile }: { isMobile: boolean }) {
