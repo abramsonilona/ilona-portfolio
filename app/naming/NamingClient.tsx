@@ -163,7 +163,7 @@ function HeroSection({ isMobile }: { isMobile: boolean }) {
   return (
     <section style={{
       background: C.lilac,
-      marginTop: isMobile ? 47 : 53,
+      marginTop: 0,
       minHeight: isMobile ? "100svh" : "100vh",
       display: "flex",
       flexDirection: "column",
