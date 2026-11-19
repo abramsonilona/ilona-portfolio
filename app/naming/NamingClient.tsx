@@ -335,7 +335,7 @@ const ABOUT_PARAGRAPHS = [
   "תהליכי ניימינג הם הדובדבן שבטופ. אחרי כל השיחות, המחקר וההחלטות על מה המותג הזה רוצה להיות, מגיע הרגע שבו צריך לתת לו שם. מילה אחת או שתיים, שאנשים יראו על האריזה, יחפשו בגוגל ויגידו בקול כשהם יספרו עליו למישהו אחר.",
 ];
 
-const ABOUT_CLOSING = "שם הוא המילה הראשונה בסיפור של המותג. תוודאו שהיא מספרת אותו כמו שצריך.";
+const ABOUT_CLOSING = "שם הוא הכותרת של סיפור המותג שלכם. תוודאו שהיא מחזיקה אותו כמו שצריך.";
 
 // ─── Fixed top bar: logo mark (symbol only) pinned to the top-left corner ─────────────
 // (the site navigation is hidden on /naming; same height as the nav)
