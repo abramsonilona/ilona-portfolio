@@ -21,7 +21,7 @@ const C = {
 
 const HE = "var(--font-heading)";
 const EN = "var(--font-body-en)";
-// Editor's Note Light Italic — used only for NAMING on the cover
+// Editor's Note Light Italic: the cover title and the opening heading
 const NAMING_SERIF = "'NamingEditorNote', Georgia, serif";
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -208,7 +208,7 @@ function CaseSection({ id, number, title, lang, descriptor, descriptorLang, cate
         }}>
           {title}
         </h3>
-        {/* Brand descriptor — same size/spacing in all cases */}
+        {/* Brand descriptor: same size/spacing in all cases */}
         <p
           lang={descriptorLang}
           dir={descriptorLang === "en" ? "ltr" : "rtl"}
@@ -229,7 +229,7 @@ function CaseSection({ id, number, title, lang, descriptor, descriptorLang, cate
         <h4 style={{ fontFamily: HE, fontWeight: 700, fontSize: isMobile ? 17 : 18, lineHeight: 1.4, color: C.ink, margin: "0 0 16px" }}>
           {heading}
         </h4>
-        {/* Desktop: text flows across 2–3 columns; mobile: one column */}
+        {/* Desktop: text flows across 2 or 3 columns; mobile: one column */}
         <div style={isMobile ? undefined : { columnCount: columns, columnGap: "clamp(32px, 3.4vw, 56px)", columnFill: "balance" }}>
           {paragraphs.map((t, i) => <p key={i} style={{ ...p, breakInside: "avoid-column" }}>{t}</p>)}
         </div>
@@ -329,7 +329,7 @@ const REVERIE_PARAGRAPHS = [
 const ABOUT_PARAGRAPHS = [
   "את הדרך המקצועית שלי התחלתי בעיתונות. שם למדתי לקרוא ערימה של חומר ולזהות את הפרט הקטן ששווה להתעכב עליו, לשאול עוד שאלה ולפעמים לגלות שהתשובה משנה את כל הסיפור. גם היום, לפני שאני חושבת איך לנסח משהו, אני רוצה להבין מה באמת יש פה להגיד.",
   "מאז 2017 אני מלווה מותגים בתהליכי מחקר, בידול, מיצוב ובניית זהות מילולית. אני אוהבת להכיר את האנשים שמאחורי המותג, להבין למה הם בחרו לעשות דברים בדרך שלהם ולגלות מה מכל זה יגרום למישהו לבחור דווקא בהם.",
-  "תהליכי ניימינג הם הדובדבן שבטופ — אחרי כל השיחות, המחקר וההחלטות על מה המותג הזה רוצה להיות, מגיע הרגע שבו צריך לתת לו שם. מילה אחת או שתיים, שאנשים יראו על האריזה, יחפשו בגוגל ויגידו בקול כשהם יספרו עליו למישהו אחר.",
+  "תהליכי ניימינג הם הדובדבן שבטופ. אחרי כל השיחות, המחקר וההחלטות על מה המותג הזה רוצה להיות, מגיע הרגע שבו צריך לתת לו שם. מילה אחת או שתיים, שאנשים יראו על האריזה, יחפשו בגוגל ויגידו בקול כשהם יספרו עליו למישהו אחר.",
 ];
 
 const ABOUT_CLOSING = "שם הוא המילה הראשונה בסיפור של המותג. תוודאו שהיא מספרת אותו כמו שצריך.";
@@ -366,10 +366,10 @@ function HeroSection({ isMobile }: { isMobile: boolean }) {
           padding: isMobile ? "48px 28px 44px" : `clamp(56px, 5vw, 88px) ${SIDE}`,
         }}
       >
-        {/* Logo lockup (name + tagline + monogram) as one unit — keep the file's ratio */}
+        {/* Logo lockup (name + tagline + monogram) as one unit; keep the file's ratio */}
         <img
           src="/naming/logo-cover.png"
-          alt="Ilona Abramson — Brand & Verbal Strategist"
+          alt="Ilona Abramson, Brand & Verbal Strategist"
           width={2363}
           height={727}
           style={{
@@ -382,12 +382,11 @@ function HeroSection({ isMobile }: { isMobile: boolean }) {
         <h1 id="naming-title" lang="en" dir="ltr" style={{
           margin: isMobile ? "24px 0 0" : "clamp(24px, 2vw, 36px) 0 0",
           fontFamily: NAMING_SERIF, fontStyle: "italic", fontWeight: 300,
-          fontSize: isMobile ? 22 : "clamp(22px, 1.9vw, 32px)",
-          lineHeight: 1, letterSpacing: "0.12em", marginRight: "-0.12em",
-          textTransform: "uppercase", whiteSpace: "nowrap",
+          fontSize: isMobile ? 28 : "clamp(28px, 2.4vw, 40px)",
+          lineHeight: 1, letterSpacing: "-0.005em", whiteSpace: "nowrap",
           color: C.forest,
         }}>
-          NAMING
+          Naming
         </h1>
       </motion.div>
     </section>
@@ -515,9 +514,9 @@ function DeesseGallery({ isMobile }: { isMobile: boolean }) {
 
 const RE = "/naming/reverie/";
 const reverie = {
-  before: { kind: "img", src: RE + "before picture.jpg", alt: "לפני — ריקולטה", w: 7594, h: 5063 },
+  before: { kind: "img", src: RE + "before picture.jpg", alt: "לפני: ריקולטה", w: 7594, h: 5063 },
   r1: { kind: "img", src: RE + "Reverie-01.jpg", alt: "Rêverie 1", w: 1222, h: 1523 },
-  r2: { kind: "img", src: RE + "Reverie-02.jpg", alt: "אחרי — Rêverie", w: 1222, h: 1523 },
+  r2: { kind: "img", src: RE + "Reverie-02.jpg", alt: "אחרי: Rêverie", w: 1222, h: 1523 },
   r3: { kind: "img", src: RE + "Reverie-03.jpg", alt: "Rêverie 3", w: 1222, h: 1523 },
   r4: { kind: "img", src: RE + "Reverie-04.jpg", alt: "Rêverie 4", w: 1222, h: 1523 },
   r5: { kind: "img", src: RE + "Reverie-05.jpg", alt: "Rêverie 5", w: 1222, h: 1523 },
@@ -661,12 +660,13 @@ function ThankYouSection({ isMobile }: { isMobile: boolean }) {
         textAlign: "center",
         padding: isMobile ? "80px 0 64px" : "clamp(96px, 8vw, 152px) 0 clamp(72px, 6vw, 112px)",
       }}>
-        <h2 id="naming-thanks" lang="en" style={{
-          margin: 0, fontFamily: EN, fontWeight: 300,
-          fontSize: isMobile ? 38 : "clamp(38px, 4vw, 72px)",
-          lineHeight: 1, letterSpacing: "-0.03em", color: C.ink,
+        <h2 id="naming-thanks" style={{
+          margin: 0, fontFamily: HE, fontWeight: 400,
+          fontSize: isMobile ? "min(23px, calc((100vw - 40px) / 15))" : "clamp(28px, 2.6vw, 44px)",
+          lineHeight: 1.3, letterSpacing: "-0.015em", color: C.ink,
         }}>
-          THANK YOU
+          <span style={{ display: "block" }}>עובדים על מותג חדש או ריברנדינג?</span>
+          <span style={{ display: "block" }}>זה הזמן לתהליך ניימינג מקצועי.</span>
         </h2>
         <ul dir="ltr" style={{
           listStyle: "none", padding: 0, margin: isMobile ? "32px 0 0" : "clamp(32px, 3vw, 48px) 0 0",
@@ -712,7 +712,7 @@ export default function NamingClient() {
       <CaseStudies isMobile={isMobile} />
       <AboutSection isMobile={isMobile} />
       <ThankYouSection isMobile={isMobile} />
-      <ProjectFooter />
+      <ProjectFooter contactLinks />
     </div>
   );
 }
