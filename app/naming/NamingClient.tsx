@@ -587,25 +587,29 @@ function ProcessSection({ isMobile }: { isMobile: boolean }) {
     <Wrap style={{ paddingTop: isMobile ? 56 : "clamp(72px, 6.4vw, 120px)" }}>
       <section aria-labelledby="naming-process">
         <h2 id="naming-process" style={sectionHeading(isMobile)}>תהליך הניימינג</h2>
-        <ol style={{ listStyle: "none", margin: isMobile ? "28px 0 0" : "clamp(28px, 2.6vw, 44px) 0 0", padding: 0, borderBottom: `1px solid ${C.rule}` }}>
+        {/* Desktop: a 4-column grid (4 + 3). Mobile: compact list, number beside the title. */}
+        <ol style={{
+          listStyle: "none", padding: 0,
+          margin: isMobile ? "24px 0 0" : "clamp(24px, 2.2vw, 36px) 0 0",
+          display: "grid",
+          gridTemplateColumns: isMobile ? "1fr" : "repeat(4, minmax(0, 1fr))",
+          columnGap: "clamp(24px, 2.6vw, 44px)",
+          rowGap: isMobile ? 0 : "clamp(28px, 2.4vw, 40px)",
+          ...(isMobile ? { borderBottom: `1px solid ${C.rule}` } : {}),
+        }}>
           {PROCESS_STEPS.map(({ num, title, body }) => (
             <li key={num} style={{
-              display: "grid",
-              gridTemplateColumns: isMobile ? "1fr" : "64px minmax(0, 260px) minmax(0, 620px)",
-              columnGap: "clamp(24px, 3vw, 48px)",
-              rowGap: 6,
-              alignItems: "baseline",
-              padding: isMobile ? "18px 0" : "22px 0",
               borderTop: `1px solid ${C.rule}`,
+              padding: isMobile ? "14px 0" : "16px 0 0",
               textAlign: "right",
             }}>
-              <span style={{ fontFamily: EN, fontWeight: 300, fontSize: 14, lineHeight: 1, letterSpacing: "0.04em", color: C.muted }}>{num}</span>
-              <h3 style={{ margin: 0, fontFamily: HE, fontWeight: 700, fontSize: isMobile ? 17 : 18, lineHeight: 1.3, color: C.ink }}>{title}</h3>
-              <div>
-                {(Array.isArray(body) ? body : [body]).map((line, j) => (
-                  <p key={j} style={{ margin: j === 0 ? 0 : "0.6em 0 0", fontFamily: HE, fontWeight: 400, fontSize: isMobile ? 15 : 15.5, lineHeight: 1.7, color: C.body }}>{line}</p>
-                ))}
+              <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 6 }}>
+                <span style={{ fontFamily: EN, fontWeight: 300, fontSize: 13, lineHeight: 1, letterSpacing: "0.04em", color: C.muted }}>{num}</span>
+                <h3 style={{ margin: 0, fontFamily: HE, fontWeight: 700, fontSize: isMobile ? 16 : 16.5, lineHeight: 1.3, color: C.ink }}>{title}</h3>
               </div>
+              {(Array.isArray(body) ? body : [body]).map((line, j) => (
+                <p key={j} style={{ margin: j === 0 ? 0 : "0.5em 0 0", fontFamily: HE, fontWeight: 400, fontSize: isMobile ? 14.5 : 14.5, lineHeight: 1.6, color: C.body }}>{line}</p>
+              ))}
             </li>
           ))}
         </ol>
