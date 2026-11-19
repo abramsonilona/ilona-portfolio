@@ -5,6 +5,8 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 
 interface Props {
   project?: Project;
+  /** Show phone / LinkedIn / email links instead of the default social icons (used on /naming). */
+  contactLinks?: boolean;
 }
 
 const C = {
@@ -47,7 +49,32 @@ function IconLinkedIn() {
   );
 }
 
-export default function ProjectFooter({ project }: Props) {
+/* ── Phone icon ─────────────────────────────────────────────────────── */
+function IconPhone() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M5 2.5h3.2l1.6 4.2-2.1 1.4a12 12 0 0 0 8.2 8.2l1.4-2.1 4.2 1.6V19a2.5 2.5 0 0 1-2.5 2.5A16.5 16.5 0 0 1 2.5 5 2.5 2.5 0 0 1 5 2.5Z" stroke={C.ink} strokeWidth="1.5" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+/* ── Mail icon ──────────────────────────────────────────────────────── */
+function IconMail() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="1.75" y="4.25" width="20.5" height="15.5" rx="2" stroke={C.ink} strokeWidth="1.5"/>
+      <path d="m2.5 5.5 9.5 7.5 9.5-7.5" stroke={C.ink} strokeWidth="1.5" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+const CONTACT_LINKS = [
+  { href: "tel:+972532777569", label: "טלפון: 053-277-7569", icon: <IconPhone /> },
+  { href: "https://www.linkedin.com/in/ilona-sammy-abramson/", label: "LinkedIn", icon: <IconLinkedIn />, external: true },
+  { href: "mailto:abramsonilona@gmail.com", label: "מייל: abramsonilona@gmail.com", icon: <IconMail /> },
+];
+
+export default function ProjectFooter({ project, contactLinks = false }: Props) {
   const designerCredit = project?.designerCredit;
   const isMobile = useIsMobile();
 
@@ -92,6 +119,19 @@ export default function ProjectFooter({ project }: Props) {
           alignItems: isMobile ? "center" : "flex-start",
           gap: isMobile ? 16 : 12,
         }}>
+          {contactLinks ? (
+          <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
+            {CONTACT_LINKS.map(l => (
+              <a key={l.href} href={l.href} aria-label={l.label} title={l.label}
+                target={l.external ? "_blank" : undefined} rel={l.external ? "noopener noreferrer" : undefined}
+                style={{ display: "block", lineHeight: 0, opacity: 1, transition: "opacity 0.2s" }}
+                onMouseEnter={e => ((e.currentTarget as HTMLElement).style.opacity = "0.6")}
+                onMouseLeave={e => ((e.currentTarget as HTMLElement).style.opacity = "1")}>
+                {l.icon}
+              </a>
+            ))}
+          </div>
+          ) : (
           <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
             <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"
               style={{ opacity: 1, transition: "opacity 0.2s" }}
@@ -112,6 +152,7 @@ export default function ProjectFooter({ project }: Props) {
               <IconWhatsapp />
             </a>
           </div>
+          )}
           <a href="mailto:abramsonilona@gmail.com"
             style={{
               fontFamily: "var(--font-body-en)", fontWeight: 300, fontSize: 11,
