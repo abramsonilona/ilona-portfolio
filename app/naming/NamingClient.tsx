@@ -257,7 +257,7 @@ const PROCESS_STEPS = [
   {
     num: "01",
     title: "מגדירים את ה-DNA של המותג",
-    body: "מתחילים בשאלון אפיון ולאחריו שיחת עומק, שבהם לומדים להכיר את המותג, קהל היעד והרגשות שהוא מבקש לעורר. יחד בוחרים שלושה ערכים מרכזיים שיכולים להוביל את השם החדש.",
+    body: "מתחילים בשאלון אפיון ולאחריו נפגשים לשיחת עומק, בה אני לומדת להכיר את המותג, את קהל היעד והרגשות שנרצה לעורר אצלו. יחד בוחרים שלושה ערכים מרכזיים שיכולים להוביל את השם החדש.",
   },
   {
     num: "02",
@@ -272,7 +272,10 @@ const PROCESS_STEPS = [
   {
     num: "04",
     title: "פרזנטציית השמות",
-    body: "חמשת השמות הטובים ביותר עולים לגמר, כשמאחורי כל אחד עומד רציונל אסטרטגי המבוסס על אחד מערכי המותג. בשלב זה מתבצעת גם בדיקה ראשונית של זמינות השמות בקטגוריה.",
+    body: [
+      "חמשת השמות הטובים ביותר עולים לגמר, כשמאחורי כל אחד עומד רציונל אסטרטגי המבוסס על אחד מערכי המותג. בשלב זה מתבצעת גם בדיקה ראשונית של זמינות השמות בקטגוריה.",
+      "מכאן אתם לוקחים כמה ימים לחשוב וחוזרים אליי עם הבחירה שלכם.",
+    ],
   },
   {
     num: "05",
@@ -334,7 +337,7 @@ const ABOUT_PARAGRAPHS = [
 
 const ABOUT_CLOSING = "שם הוא המילה הראשונה בסיפור של המותג. תוודאו שהיא מספרת אותו כמו שצריך.";
 
-// ─── Fixed top bar: logo pinned to the top-left corner ─────────────
+// ─── Fixed top bar: logo mark (symbol only) pinned to the top-left corner ─────────────
 // (the site navigation is hidden on /naming; same height as the nav)
 function TopBar({ isMobile }: { isMobile: boolean }) {
   return (
@@ -345,8 +348,8 @@ function TopBar({ isMobile }: { isMobile: boolean }) {
       display: "flex", alignItems: "center", justifyContent: "flex-end", // RTL: end = left
       background: "rgba(252,247,244,0.97)", borderBottom: "1px solid var(--rule)",
     }}>
-      <img src="/logo.png.png" alt="Ilona Abramson" width={2712} height={164}
-        style={{ height: 18, width: "auto", display: "block", objectFit: "contain" }} />
+      <img src="/naming/logo-mark.png" alt="Ilona Abramson" width={498} height={128}
+        style={{ height: isMobile ? 18 : 20, width: "auto", display: "block", objectFit: "contain" }} />
     </header>
   );
 }
@@ -366,17 +369,17 @@ function HeroSection({ isMobile }: { isMobile: boolean }) {
           padding: isMobile ? "48px 28px 44px" : `clamp(56px, 5vw, 88px) ${SIDE}`,
         }}
       >
-        {/* Logo lockup (name + tagline + monogram) as one unit; keep the file's ratio */}
+        {/* Name + tagline as one unit (the symbol lives in the top bar); keep the file's ratio */}
         <img
-          src="/naming/logo-cover.png"
+          src="/naming/logo-wordmark.png"
           alt="Ilona Abramson, Brand & Verbal Strategist"
           width={2363}
-          height={727}
+          height={419}
           style={{
             display: "block",
             width: isMobile ? "min(340px, 100%)" : "clamp(320px, 36vw, 560px)",
             height: "auto",
-            aspectRatio: "2363 / 727",
+            aspectRatio: "2363 / 419",
           }}
         />
         <h1 id="naming-title" lang="en" dir="ltr" style={{
@@ -386,7 +389,7 @@ function HeroSection({ isMobile }: { isMobile: boolean }) {
           lineHeight: 1, letterSpacing: "-0.005em", whiteSpace: "nowrap",
           color: C.forest,
         }}>
-          Naming
+          Let’s talk about Naming
         </h1>
       </motion.div>
     </section>
@@ -458,7 +461,11 @@ function ProcessSection({ isMobile }: { isMobile: boolean }) {
             }}>
               <span style={{ fontFamily: EN, fontWeight: 300, fontSize: 14, lineHeight: 1, letterSpacing: "0.04em", color: C.muted }}>{num}</span>
               <h3 style={{ margin: 0, fontFamily: HE, fontWeight: 700, fontSize: isMobile ? 17 : 18, lineHeight: 1.3, color: C.ink }}>{title}</h3>
-              <p style={{ margin: 0, fontFamily: HE, fontWeight: 400, fontSize: isMobile ? 15 : 15.5, lineHeight: 1.7, color: C.body }}>{body}</p>
+              <div>
+                {(Array.isArray(body) ? body : [body]).map((line, j) => (
+                  <p key={j} style={{ margin: j === 0 ? 0 : "0.6em 0 0", fontFamily: HE, fontWeight: 400, fontSize: isMobile ? 15 : 15.5, lineHeight: 1.7, color: C.body }}>{line}</p>
+                ))}
+              </div>
             </li>
           ))}
         </ol>
@@ -479,6 +486,7 @@ const myjool = {
   m5: { kind: "img", src: MY + "WhatsApp Image 2023-02-24 at 09.27.57 (1).jpeg", alt: "MYJOOL 5", w: 1080, h: 1080 },
   m6: { kind: "img", src: MY + "WhatsApp Image 2023-02-24 at 09.27.57 (3).jpeg", alt: "MYJOOL 6", w: 1080, h: 1080 },
   m7: { kind: "img", src: MY + "WhatsApp Image 2023-02-24 at 09.27.57 (4).jpeg", alt: "MYJOOL 7", w: 1080, h: 1080 },
+  v1: { kind: "video", src: MY + "myjool-daily-charger.mp4", poster: MY + "myjool-daily-charger-poster.jpg", label: "סרטון MYJOOL", w: 360, h: 640 },
 } satisfies Record<string, Media>;
 
 function MyjoolGallery({ isMobile }: { isMobile: boolean }) {
@@ -486,8 +494,8 @@ function MyjoolGallery({ isMobile }: { isMobile: boolean }) {
   return (
     <Gallery
       isMobile={isMobile}
-      desktop={[[m.m2, m.m3, m.m4], [m.m1, m.m5, m.m6, m.m7]]}
-      mobile={[[m.m2], [m.m3, m.m4], [m.m1, m.m5], [m.m6, m.m7]]}
+      desktop={[[m.v1, m.m2, m.m3, m.m4], [m.m1, m.m5, m.m6, m.m7]]}
+      mobile={[[m.m2], [m.v1, m.m3], [m.m4, m.m1], [m.m5, m.m6, m.m7]]}
     />
   );
 }
@@ -645,13 +653,8 @@ function AboutSection({ isMobile }: { isMobile: boolean }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// SECTION 5 — Thank you
+// SECTION 5 — Closing invitation
 // ═══════════════════════════════════════════════════════════════════
-const CONTACTS = [
-  { display: "LinkedIn", href: "https://www.linkedin.com/in/ilona-sammy-abramson/" },
-  { display: "053-277-7569", href: "tel:+972532777569" },
-  { display: "abramsonilona@gmail.com", href: "mailto:abramsonilona@gmail.com" },
-];
 
 function ThankYouSection({ isMobile }: { isMobile: boolean }) {
   return (
@@ -662,35 +665,12 @@ function ThankYouSection({ isMobile }: { isMobile: boolean }) {
       }}>
         <h2 id="naming-thanks" style={{
           margin: 0, fontFamily: HE, fontWeight: 400,
-          fontSize: isMobile ? "min(23px, calc((100vw - 40px) / 15))" : "clamp(28px, 2.6vw, 44px)",
-          lineHeight: 1.3, letterSpacing: "-0.015em", color: C.ink,
+          fontSize: isMobile ? 18 : "clamp(19px, 1.5vw, 24px)",
+          lineHeight: 1.5, letterSpacing: "-0.005em", color: C.ink, textWrap: "balance",
         }}>
           <span style={{ display: "block" }}>עובדים על מותג חדש או ריברנדינג?</span>
-          <span style={{ display: "block" }}>זה הזמן לתהליך ניימינג מקצועי.</span>
+          <span style={{ display: "block" }}>אני מזמינה אתכם לתהליך ניימינג מקצועי ומסקרן</span>
         </h2>
-        <ul dir="ltr" style={{
-          listStyle: "none", padding: 0, margin: isMobile ? "32px 0 0" : "clamp(32px, 3vw, 48px) 0 0",
-          display: "flex", flexDirection: isMobile ? "column" : "row", flexWrap: "wrap",
-          justifyContent: "center", alignItems: "center", gap: isMobile ? 14 : "12px 48px",
-          fontFamily: EN, fontWeight: 300, fontSize: isMobile ? 16 : 17, lineHeight: 1.4,
-        }}>
-          {CONTACTS.map(({ display, href }) => {
-            const ext = href.startsWith("http");
-            return (
-              <li key={href}>
-                <a
-                  href={href}
-                  target={ext ? "_blank" : undefined}
-                  rel={ext ? "noopener noreferrer" : undefined}
-                  className="naming-link"
-                  style={{ color: C.ink, textDecoration: "underline", textDecorationThickness: 1, textUnderlineOffset: 4 }}
-                >
-                  {display}
-                </a>
-              </li>
-            );
-          })}
-        </ul>
       </section>
     </Wrap>
   );
@@ -704,7 +684,7 @@ export default function NamingClient() {
 
   return (
     <div style={{ background: C.cream, color: C.ink, direction: "rtl", overflowX: "clip" }}>
-      <style>{`@font-face{font-family:"NamingEditorNote";src:url("/fonts/Editor_sNote-LightItalic.otf") format("opentype");font-weight:300;font-style:italic;font-display:swap}.naming-link:hover{color:${C.violet} !important;text-decoration-thickness:2px !important}`}</style>
+      <style>{`@font-face{font-family:"NamingEditorNote";src:url("/fonts/Editor_sNote-LightItalic.otf") format("opentype");font-weight:300;font-style:italic;font-display:swap}`}</style>
       <TopBar isMobile={isMobile} />
       <HeroSection isMobile={isMobile} />
       <OpeningSection isMobile={isMobile} />
