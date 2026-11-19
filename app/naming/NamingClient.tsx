@@ -346,20 +346,20 @@ function HeroSection({ isMobile }: { isMobile: boolean }) {
         transition={{ duration: 0.7, ease: EASE }}
         style={{
           display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center",
-          padding: isMobile ? "48px 40px 44px" : `clamp(56px, 5vw, 88px) ${SIDE}`,
+          padding: isMobile ? "48px 28px 44px" : `clamp(56px, 5vw, 88px) ${SIDE}`,
         }}
       >
-        {/* Logo + tagline as one unit — keep the file's ratio */}
+        {/* Logo lockup (name + tagline + monogram) as one unit — keep the file's ratio */}
         <img
-          src="/naming/logo-tagline.svg"
+          src="/naming/logo-cover.png"
           alt="Ilona Abramson — Brand & Verbal Strategist"
-          width={566}
-          height={317}
+          width={2363}
+          height={727}
           style={{
             display: "block",
-            width: isMobile ? "min(250px, 100%)" : "clamp(240px, 21vw, 380px)",
+            width: isMobile ? "min(340px, 100%)" : "clamp(320px, 36vw, 560px)",
             height: "auto",
-            aspectRatio: "565.95 / 317.13",
+            aspectRatio: "2363 / 727",
           }}
         />
         <h1 id="naming-title" lang="en" dir="ltr" style={{
