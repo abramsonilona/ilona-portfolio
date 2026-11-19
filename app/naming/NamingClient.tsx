@@ -17,6 +17,7 @@ const C = {
   caseRule: "#cfc7bd", // between cases
   media:  "#efe8e1",
   violet: "#a173ea",
+  lime:   "#e0ff5c", // brand lime
   violetText: "#6b3fb8", // violet that passes 4.5:1 on cream, for small type
 };
 
@@ -299,7 +300,9 @@ function CaseSection({ id, number, title, lang, descriptor, descriptorLang, cate
                 style={{
                   marginTop: 16, padding: "10px 0", background: "none", border: 0, cursor: "pointer",
                   fontFamily: HE, fontWeight: 700, fontSize: 15, color: C.ink,
-                  textDecoration: "underline", textUnderlineOffset: 5, textDecorationThickness: 1,
+                  // Lime brand bar under the label
+                  textDecoration: "underline", textDecorationColor: C.lime,
+                  textDecorationThickness: 5, textUnderlineOffset: 4, textDecorationSkipInk: "none",
                 }}
               >
                 קראו עוד
@@ -542,7 +545,7 @@ function HeroSection({ isMobile }: { isMobile: boolean }) {
 const OPENING_PARAGRAPHS = [
   "כשאתם שומעים שם של מותג, הוא צריך לגרום לכם לדמיין משהו. לפעמים זו תמונה שעולה בראש, לפעמים זו תחושה, ולפעמים זו אסוציאציה שמפתיעה גם אתכם.",
   "מאחורי כל שם שאני יוצרת עומדת החלטה אסטרטגית. מה מתוך הסיפור והערכים של המותג אנחנו רוצים שיגיע לצד השני, ואיזו תחושה אנחנו רוצים להשאיר? כל זה צריך להיכנס למילה (או שתיים) שקל לזכור, קל לבטא, נוח לעבוד איתה טיפוגרפית, ואם אפשר גם כזו שלא שמענו אלף פעם קודם.",
-  "נשמע מסובך? זה בדיוק מסוג האתגרים שאני אוהבת לפצח.",
+  "נשמע מסובך?\nזה בדיוק מסוג האתגרים שאני אוהבת לפצח.", // \n = line break
 ];
 
 function OpeningSection({ isMobile }: { isMobile: boolean }) {
@@ -569,6 +572,7 @@ function OpeningSection({ isMobile }: { isMobile: boolean }) {
               fontFamily: HE, fontWeight: i === OPENING_PARAGRAPHS.length - 1 ? 700 : 400,
               fontSize: isMobile ? 16 : 17, lineHeight: 1.75,
               color: i === OPENING_PARAGRAPHS.length - 1 ? C.ink : C.body,
+              whiteSpace: "pre-line",
             }}>
               {t}
             </p>
