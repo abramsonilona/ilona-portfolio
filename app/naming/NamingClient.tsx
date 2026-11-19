@@ -179,13 +179,13 @@ interface CaseProps {
   category: string;
   heading: string;
   paragraphs: string[];
-  credit?: string;
+  credits?: { label: string; name: string; lang?: "he" | "en" }[];
   columns: 2 | 3; // desktop text columns, by text length
   isMobile: boolean;
   children: React.ReactNode; // gallery
 }
 
-function CaseSection({ id, number, title, lang, descriptor, descriptorLang, category, heading, paragraphs, credit, columns, isMobile, children }: CaseProps) {
+function CaseSection({ id, number, title, lang, descriptor, descriptorLang, category, heading, paragraphs, credits, columns, isMobile, children }: CaseProps) {
   const p: React.CSSProperties = {
     fontFamily: HE, fontWeight: 400, fontSize: isMobile ? 15 : 15.5, lineHeight: 1.75,
     color: C.body, margin: "0 0 1em",
@@ -233,11 +233,15 @@ function CaseSection({ id, number, title, lang, descriptor, descriptorLang, cate
         <div style={isMobile ? undefined : { columnCount: columns, columnGap: "clamp(32px, 3.4vw, 56px)", columnFill: "balance" }}>
           {paragraphs.map((t, i) => <p key={i} style={{ ...p, breakInside: "avoid-column" }}>{t}</p>)}
         </div>
-        {credit && (
-          <p style={{ ...p, fontSize: 14, lineHeight: 1.6, margin: isMobile ? "24px 0 0" : "20px 0 0" }}>
-            <b style={{ display: "block", color: C.ink, fontWeight: 700 }}>מיתוג ועיצוב</b>
-            <span lang="en">{credit}</span>
-          </p>
+        {credits && credits.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "12px 40px", marginTop: isMobile ? 24 : 20 }}>
+            {credits.map(c => (
+              <p key={c.label} style={{ ...p, fontSize: 14, lineHeight: 1.6, margin: 0 }}>
+                <b style={{ display: "block", color: C.ink, fontWeight: 700 }}>{c.label}</b>
+                <span lang={c.lang ?? "he"}>{c.name}</span>
+              </p>
+            ))}
+          </div>
         )}
       </div>
 
@@ -573,6 +577,10 @@ function CaseStudies({ isMobile }: { isMobile: boolean }) {
           category="ניימינג | טאגליין"
           heading="מהמזווה של סבתא למדפי Waitrose בלונדון"
           paragraphs={MYJOOL_PARAGRAPHS}
+          credits={[
+            { label: "מיתוג וקריאייטיב", name: "סטודיו ברוך נאה" },
+            { label: "איור", name: "אלונה מילגרם" },
+          ]}
           columns={3}
           isMobile={isMobile}
         >
@@ -588,7 +596,7 @@ function CaseStudies({ isMobile }: { isMobile: boolean }) {
           heading="השם שברא את עצמו"
           paragraphs={DEESSE_PARAGRAPHS}
           columns={3}
-          credit="Hadar Mizrahi"
+          credits={[{ label: "מיתוג ועיצוב", name: "Hadar Mizrahi", lang: "en" }]}
           isMobile={isMobile}
         >
           <DeesseGallery isMobile={isMobile} />
@@ -603,7 +611,7 @@ function CaseStudies({ isMobile }: { isMobile: boolean }) {
           heading="לגרום לכם לחלום על השוקולד הזה"
           paragraphs={REVERIE_PARAGRAPHS}
           columns={2}
-          credit="Hadar Mizrahi"
+          credits={[{ label: "מיתוג ועיצוב", name: "Hadar Mizrahi", lang: "en" }]}
           isMobile={isMobile}
         >
           <ReverieGallery isMobile={isMobile} />
