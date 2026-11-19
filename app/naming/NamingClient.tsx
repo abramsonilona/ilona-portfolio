@@ -21,6 +21,8 @@ const C = {
 
 const HE = "var(--font-heading)";
 const EN = "var(--font-body-en)";
+// Editor's Note Light Italic — used only for NAMING on the cover
+const NAMING_SERIF = "'NamingEditorNote', Georgia, serif";
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 // ─── Spacing ───────────────────────────────────────────────────────
@@ -172,6 +174,8 @@ interface CaseProps {
   number: string;
   title: string;
   lang: string;
+  descriptor: string;
+  descriptorLang: "he" | "en";
   category: string;
   heading: string;
   paragraphs: string[];
@@ -181,7 +185,7 @@ interface CaseProps {
   children: React.ReactNode; // gallery
 }
 
-function CaseSection({ id, number, title, lang, category, heading, paragraphs, credit, columns, isMobile, children }: CaseProps) {
+function CaseSection({ id, number, title, lang, descriptor, descriptorLang, category, heading, paragraphs, credit, columns, isMobile, children }: CaseProps) {
   const p: React.CSSProperties = {
     fontFamily: HE, fontWeight: 400, fontSize: isMobile ? 15 : 15.5, lineHeight: 1.75,
     color: C.body, margin: "0 0 1em",
@@ -204,7 +208,19 @@ function CaseSection({ id, number, title, lang, category, heading, paragraphs, c
         }}>
           {title}
         </h3>
-        <p style={{ fontFamily: HE, fontWeight: 400, fontSize: 14, lineHeight: 1.4, color: C.muted, margin: "8px 0 0" }}>
+        {/* Brand descriptor — same size/spacing in all cases */}
+        <p
+          lang={descriptorLang}
+          dir={descriptorLang === "en" ? "ltr" : "rtl"}
+          style={{
+            fontFamily: descriptorLang === "en" ? EN : HE,
+            fontWeight: descriptorLang === "en" ? 300 : 400,
+            fontSize: 16, lineHeight: 1.4, color: C.ink, margin: "8px 0 0", textAlign: "right",
+          }}
+        >
+          {descriptor}
+        </p>
+        <p style={{ fontFamily: HE, fontWeight: 400, fontSize: 14, lineHeight: 1.4, color: C.muted, margin: "4px 0 0" }}>
           {category}
         </p>
       </motion.div>
@@ -347,10 +363,11 @@ function HeroSection({ isMobile }: { isMobile: boolean }) {
           }}
         />
         <h1 id="naming-title" lang="en" dir="ltr" style={{
-          margin: isMobile ? "28px 0 0" : "clamp(28px, 2.4vw, 40px) 0 0",
-          fontFamily: EN, fontWeight: 300,
-          fontSize: isMobile ? 14 : "clamp(15px, 1.1vw, 19px)",
-          lineHeight: 1, letterSpacing: "0.34em", marginRight: "-0.34em",
+          margin: isMobile ? "24px 0 0" : "clamp(24px, 2vw, 36px) 0 0",
+          fontFamily: NAMING_SERIF, fontStyle: "italic", fontWeight: 300,
+          fontSize: isMobile ? 22 : "clamp(22px, 1.9vw, 32px)",
+          lineHeight: 1, letterSpacing: "0.12em", marginRight: "-0.12em",
+          textTransform: "uppercase", whiteSpace: "nowrap",
           color: C.forest,
         }}>
           NAMING
@@ -361,31 +378,41 @@ function HeroSection({ isMobile }: { isMobile: boolean }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// SECTION 1b — Opening line
+// SECTION 1b — Opening
 // ═══════════════════════════════════════════════════════════════════
+const OPENING_PARAGRAPHS = [
+  "כשאתם שומעים שם של מותג, הוא צריך לגרום לכם לדמיין משהו. לפעמים זו תמונה שעולה בראש, לפעמים זו תחושה, ולפעמים זו אסוציאציה שמפתיעה גם אתכם.",
+  "מאחורי כל שם שאני יוצרת עומדת החלטה אסטרטגית. מה מתוך הסיפור והערכים של המותג אנחנו רוצים שיגיע לצד השני, ואיזו תחושה אנחנו רוצים להשאיר? כל זה צריך להיכנס למילה (או שתיים) שקל לזכור, קל לבטא, נוח לעבוד איתה טיפוגרפית, ואם אפשר גם כזו שלא שמענו אלף פעם קודם.",
+  "נשמע מסובך? זה בדיוק מסוג האתגרים שאני אוהבת לפצח.",
+];
+
 function OpeningSection({ isMobile }: { isMobile: boolean }) {
   return (
     <Wrap>
-      <section aria-label="פתיח" style={{
-        textAlign: "center",
-        padding: isMobile ? "56px 4px 8px" : "clamp(72px, 6.4vw, 120px) 0 clamp(16px, 1.6vw, 28px)",
+      <section aria-labelledby="naming-opening" style={{
+        textAlign: "right",
+        padding: isMobile ? "56px 0 0" : "clamp(72px, 6.4vw, 120px) 0 0",
       }}>
-        <p style={{
-          margin: "0 auto", maxWidth: isMobile ? "16em" : "none",
-          fontFamily: HE, fontWeight: 400,
-          fontSize: isMobile ? 24 : "clamp(26px, 2.4vw, 40px)",
-          lineHeight: 1.3, letterSpacing: "-0.015em", color: C.ink, textWrap: "balance",
-        }}>
-          שם הוא המילה הראשונה בסיפור שהמותג שלכם יספר.
-        </p>
-        <p lang="en" dir="ltr" style={{
-          margin: isMobile ? "14px 0 0" : "clamp(14px, 1.2vw, 20px) 0 0",
+        <h2 id="naming-opening" lang="en" dir="ltr" style={{
+          margin: 0, textAlign: "right",
           fontFamily: EN, fontWeight: 300,
-          fontSize: isMobile ? 14 : "clamp(14px, 1vw, 17px)",
-          lineHeight: 1.4, letterSpacing: "0.01em", color: C.muted,
+          fontSize: isMobile ? 26 : "clamp(28px, 2.6vw, 44px)",
+          lineHeight: 1.15, letterSpacing: "-0.02em", color: C.ink, textWrap: "balance",
         }}>
-          With great power comes great responsibility.
-        </p>
+          Before I look for a name, I look for what makes the brand worth naming.
+        </h2>
+        <div style={{ maxWidth: 720, marginTop: isMobile ? 24 : "clamp(24px, 2.2vw, 36px)" }}>
+          {OPENING_PARAGRAPHS.map((t, i) => (
+            <p key={i} style={{
+              margin: i === 0 ? 0 : "1em 0 0",
+              fontFamily: HE, fontWeight: i === OPENING_PARAGRAPHS.length - 1 ? 700 : 400,
+              fontSize: isMobile ? 16 : 17, lineHeight: 1.75,
+              color: i === OPENING_PARAGRAPHS.length - 1 ? C.ink : C.body,
+            }}>
+              {t}
+            </p>
+          ))}
+        </div>
       </section>
     </Wrap>
   );
@@ -516,6 +543,7 @@ function CaseStudies({ isMobile }: { isMobile: boolean }) {
 
         <CaseSection
           id="case-myjool" number="#1" title="MYJOOL" lang="en"
+          descriptor="מותג תמרים בינלאומי" descriptorLang="he"
           category="ניימינג | טאגליין"
           heading="מהמזווה של סבתא למדפי Waitrose בלונדון"
           paragraphs={MYJOOL_PARAGRAPHS}
@@ -529,6 +557,7 @@ function CaseStudies({ isMobile }: { isMobile: boolean }) {
 
         <CaseSection
           id="case-deesse" number="#2" title="Déesse" lang="fr"
+          descriptor="Fine Jewelry" descriptorLang="en"
           category="ניימינג | טאגליין"
           heading="השם שברא את עצמו"
           paragraphs={DEESSE_PARAGRAPHS}
@@ -543,6 +572,7 @@ function CaseStudies({ isMobile }: { isMobile: boolean }) {
 
         <CaseSection
           id="case-reverie" number="#3" title="Rêverie" lang="fr"
+          descriptor="Chocolatier" descriptorLang="en"
           category="ניימינג | טאגליין"
           heading="לגרום לכם לחלום על השוקולד הזה"
           paragraphs={REVERIE_PARAGRAPHS}
@@ -655,7 +685,7 @@ export default function NamingClient() {
 
   return (
     <div style={{ background: C.cream, color: C.ink, direction: "rtl", overflowX: "clip" }}>
-      <style>{`.naming-link:hover{color:${C.violet} !important;text-decoration-thickness:2px !important}`}</style>
+      <style>{`@font-face{font-family:"NamingEditorNote";src:url("/fonts/Editor_sNote-LightItalic.otf") format("opentype");font-weight:300;font-style:italic;font-display:swap}.naming-link:hover{color:${C.violet} !important;text-decoration-thickness:2px !important}`}</style>
       <HeroSection isMobile={isMobile} />
       <OpeningSection isMobile={isMobile} />
       <ProcessSection isMobile={isMobile} />
